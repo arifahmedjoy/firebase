@@ -1,0 +1,23 @@
+{
+  "name": "firebase",
+  "version": "1.0.0",
+  "description": "Real Time Communication between Firebase Database & NodeJS",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arifahmedjoy/firebase.git"
+  },
+  "keywords": [
+    "firebase",
+    "nodejs"
+  ],
+  "author": "Arif Ahmed Joy",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/arifahmedjoy/firebase/issues"
+  },
+  "homepage": "https://github.com/arifahmedjoy/firebase#readme"
+}

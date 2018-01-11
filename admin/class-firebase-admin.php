@@ -18,7 +18,7 @@
  *
  * @package    Firebase
  * @subpackage Firebase/admin
- * @author     Your Name <email@example.com>
+ * @author     Arif Ahmed Joy <arif@avalonhosting.services>
  */
 class Firebase_Admin {
 

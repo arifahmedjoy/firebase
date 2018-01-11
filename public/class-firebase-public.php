@@ -18,7 +18,7 @@
  *
  * @package    Firebase
  * @subpackage Firebase/public
- * @author     Your Name <email@example.com>
+ * @author     Arif Ahmed Joy <arif@avalonhosting.services>
  */
 class Firebase_Public {
 
@@ -73,7 +73,7 @@ class Firebase_Public {
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/plugin-name-public.css', array(), $this->version, 'all' );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/firebase-public.css', array(), $this->version, 'all' );
 
 	}
 
@@ -95,8 +95,8 @@ class Firebase_Public {
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
-
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/plugin-name-public.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( $this->plugin_name, 'https://www.gstatic.com/firebasejs/4.8.1/firebase.js', array( 'jquery' ), $this->version, true );
+		wp_enqueue_script( $this->plugin_name.'-public', plugin_dir_url( __FILE__ ) . 'js/firebase-public.js', array( 'firebase' ), $this->version, true );
 
 	}
 

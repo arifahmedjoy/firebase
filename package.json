@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/arifahmedjoy/firebase/issues"
   },
-  "homepage": "https://github.com/arifahmedjoy/firebase#readme"
+  "homepage": "https://github.com/arifahmedjoy/firebase#readme",
+  "dependencies": {
+    "googleapis": "^24.0.0"
+  }
 }

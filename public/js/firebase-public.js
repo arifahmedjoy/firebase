@@ -166,7 +166,7 @@
 				});
 				// values = JSON.parse(values);
 				$('#um-submit-btn').parent().append('05' + values["deviceId-135"]+ values["first_name-135"]+ values["last_name-135"]+ values["address"]+ values["zip-135"]+ values["user_email-135"]+ values["phone_number-135"]);
-				writeUserData("05", values["deviceId-135"], values["first_name-135"], values["last_name-135"], values["address"], values["zip-135"], values["user_email-135"], "2665265121");
+				writeUserData("05", values["deviceId-135"], values["first_name-135"], values["last_name-135"], values["address"], values["address"], values["zip-135"], values["user_email-135"], values["phone_number-135"]);
 				alert(JSON.stringify(values)+'VALIDATED!!!');
 
 			}

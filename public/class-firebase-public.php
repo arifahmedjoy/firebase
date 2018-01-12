@@ -97,6 +97,8 @@ class Firebase_Public {
 		 */
 		wp_enqueue_script( $this->plugin_name, 'https://www.gstatic.com/firebasejs/4.8.1/firebase.js', array( 'jquery' ), $this->version, true );
 		wp_enqueue_script( $this->plugin_name.'-public', plugin_dir_url( __FILE__ ) . 'js/firebase-public.js', array( 'firebase' ), $this->version, true );
+		wp_enqueue_script( $this->plugin_name.'-validate', 'https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.min.js', array( 'jquery' ), $this->version, true );
+		wp_enqueue_script( $this->plugin_name.'-validate-extra', 'https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/additional-methods.min.js', array( 'jquery' ), $this->version, true );
 
 	}
 

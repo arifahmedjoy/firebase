@@ -1,2 +1,2 @@
 # firebase
-Real Time Communication between Firebase Database &amp; NodeJS
+Real Time Communication between Firebase Database

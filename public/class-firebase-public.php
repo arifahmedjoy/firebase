@@ -51,6 +51,8 @@ class Firebase_Public {
 	private $login_errors;
 	private $profile_errors;
 
+	private $logged_in;
+
 	/**
 	 * Initialize the class and set its properties.
 	 *
@@ -251,6 +253,7 @@ class Firebase_Public {
 					// Get a reference to the database service
 
 					firebase.database().ref("users/" + "'.$username.'").set({
+						online 		: 	false,
 					   	deviceID 	: 	"'.$deviceID.'",
 					   	username 	: 	"'.$username.'",
 					    firstName 	: 	"'.$first_name.'",
@@ -340,6 +343,32 @@ class Firebase_Public {
 		        $phone,
 		        $zip
 		        );
+		} else {
+			// Displaying the Logout Form
+			$this->logout_form();
+			if ( isset($_POST['logout']) ) {
+		    	wp_logout();
+		    	$this->logged_in = false;
+		    	$user = wp_get_current_user();
+		    	echo '
+			        <script>
+			        	(function( $ ) {
+							"use strict";
+
+							// Get a reference to the database service
+
+							firebase.database().ref("users/" + "'.$user->data->user_login.'").update({
+							    online : false
+							  })
+							.then(function(data) {
+								  console.log("Successfully Stored Data! "+ data);
+								}).catch(function (error){
+									 console.log(error);
+							  });
+			        	})( jQuery );
+			        </script>';
+		    	wp_logout_url();
+		    }
 		}
 	}
 
@@ -361,6 +390,34 @@ class Firebase_Public {
 	    <input id="btnLogin" type="submit" name="login" value="Login"/>
 	    </form>
 	    ';
+	}
+
+	public function logout_form( ) {
+	 	$user = wp_get_current_user();	 	
+
+	 	if (!empty($user->data->display_name)){
+		    echo '
+			    <form action="' . $_SERVER['REQUEST_URI'] . '" method="post">	     
+			     
+			    <div>
+			    	'.$user->data->display_name.' , click on the logout button to logout!
+			    </div>
+
+			    <input id="btnLogout" type="submit" name="logout" value="Logout"/>
+			    </form>
+		    ';
+		} else {
+		    echo '
+			    <form action="' . $_SERVER['REQUEST_URI'] . '" method="post">	     
+			     
+			    <div>
+			    	You have successfully Loggedin!
+			    </div>
+
+			    <input id="btnLogout" type="submit" name="logout" value="Logout"/>
+			    </form>
+		    ';			
+		}
 	}
 
 	public function login_validation( $email, $password )  {
@@ -439,21 +496,67 @@ class Firebase_Public {
 			        'user_password' => $_POST['password'],
 			        'remember'      => true
 			    );
-			 
+			 	
 			    $signin = wp_signon( $creds, false );
 			 
 			    if ( is_wp_error( $signin ) ) {
 			        echo $signin->get_error_message();
+			    } else {
+			    	$this->logged_in = true;
+			    	echo '
+				        <script>
+				        	(function( $ ) {
+								"use strict";
+
+								// Get a reference to the database service
+
+								firebase.database().ref("users/" + "'.$user->data->user_login.'").update({
+								    online : true
+								  })
+								.then(function(data) {
+									  console.log("Successfully Stored Data! "+ data);
+									}).catch(function (error){
+										 console.log(error);
+								  });
+				        	})( jQuery );
+				        </script>';
 			    }
 				// wp_redirect(home_url()); exit;
 			}
-	    } 
-	    if (empty(wp_get_current_user())) {
-		 	//Displaying the signup form
+	    }
+	    if ( isset($_POST['logout']) ) {
+	    	wp_logout();
+	    	$this->logged_in = false;
+	    	$user = wp_get_current_user();
+	    	echo '
+		        <script>
+		        	(function( $ ) {
+						"use strict";
+
+						// Get a reference to the database service
+
+						firebase.database().ref("users/" + "'.$user->data->user_login.'").update({
+						    online : false
+						  })
+						.then(function(data) {
+							  console.log("Successfully Stored Data! "+ data);
+							}).catch(function (error){
+								 console.log(error);
+						  });
+		        	})( jQuery );
+		        </script>';
+	    	wp_logout_url();
+	    }
+	    
+	    if ( !$this->logged_in ) {
+		 	//Displaying the login form
 		    $this->login_form(
 		        $email,
 		        $password
 	        );
+		} else {
+			// Displaying the Logout Form
+			$this->logout_form();
 		}
 	}
 }

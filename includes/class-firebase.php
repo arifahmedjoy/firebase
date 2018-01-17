@@ -76,7 +76,6 @@ class Firebase {
 
 		$this->load_dependencies();
 		$this->set_locale();
-		$this->define_admin_hooks();
 		$this->define_public_hooks();
 
 		// Register a new shortcode: [firebase_registration]
@@ -131,12 +130,7 @@ class Firebase {
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-firebase-i18n.php';
-
-		/**
-		 * The class responsible for defining all actions that occur in the admin area.
-		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-firebase-admin.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-firebase-i18n.php';		
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
@@ -162,22 +156,6 @@ class Firebase {
 		$plugin_i18n = new Firebase_i18n();
 
 		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
-
-	}
-
-	/**
-	 * Register all of the hooks related to the admin area functionality
-	 * of the plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 */
-	private function define_admin_hooks() {
-
-		$plugin_admin = new Firebase_Admin( $this->get_firebase(), $this->get_version() );
-
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
 	}
 

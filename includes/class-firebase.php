@@ -72,12 +72,34 @@ class Firebase {
 		} else {
 			$this->version = '1.0.0';
 		}
-		$this->plugin_name = 'firebase';
+		$this->firebase = 'firebase';
 
 		$this->load_dependencies();
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
+
+		// Register a new shortcode: [firebase_registration]
+		add_shortcode( 'firebase_registration', 'custom_registration_shortcode' );
+
+		// The callback function that will replace [firebase_registration]
+		function custom_registration_shortcode() {
+		    ob_start();
+		    $firebase = new Firebase_Public( 'firebase', FIREBASE );
+		    $firebase->custom_registration_function();
+		    return ob_get_clean();
+		}
+
+		// Register a new shortcode: [firebase_login]
+		add_shortcode( 'firebase_login', 'custom_login_shortcode' );
+
+		// The callback function that will replace [firebase_login]
+		function custom_login_shortcode() {
+		    ob_start();
+		    $firebase = new Firebase_Public( 'firebase', FIREBASE );
+		    $firebase->custom_login_function();
+		    return ob_get_clean();
+		}
 
 	}
 
@@ -152,7 +174,7 @@ class Firebase {
 	 */
 	private function define_admin_hooks() {
 
-		$plugin_admin = new Firebase_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = new Firebase_Admin( $this->get_firebase(), $this->get_version() );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
@@ -168,7 +190,7 @@ class Firebase {
 	 */
 	private function define_public_hooks() {
 
-		$plugin_public = new Firebase_Public( $this->get_plugin_name(), $this->get_version() );
+		$plugin_public = new Firebase_Public( $this->get_firebase(), $this->get_version() );
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
@@ -191,8 +213,8 @@ class Firebase {
 	 * @since     1.0.0
 	 * @return    string    The name of the plugin.
 	 */
-	public function get_plugin_name() {
-		return $this->plugin_name;
+	public function get_firebase() {
+		return $this->firebase;
 	}
 
 	/**

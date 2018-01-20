@@ -86,6 +86,8 @@ class Firebase_Public {
 		 * class.
 		 */
 
+		wp_enqueue_style( 'bootstrap4-reboot', 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap-reboot.css', array(), '4.0.0', 'all' );
+		wp_enqueue_style( 'bootstrap4','https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css', array(), '4.0.0', 'all' );		
 		wp_enqueue_style( $this->firebase, plugin_dir_url( __FILE__ ) . 'css/firebase-public.css', array(), $this->version, 'all' );
 
 	}
@@ -110,86 +112,134 @@ class Firebase_Public {
 		 */
 		wp_enqueue_script( $this->firebase, 'https://www.gstatic.com/firebasejs/4.8.1/firebase.js', array( 'jquery' ), $this->version, false );
 		wp_enqueue_script( $this->firebase.'-public', plugin_dir_url( __FILE__ ) . 'js/firebase-public.js', array( 'firebase' ), $this->version, false );
-		wp_enqueue_script( $this->firebase.'-validate', 'https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.min.js', array( 'jquery' ), $this->version, true );
-		wp_enqueue_script( $this->firebase.'-validate-extra', 'https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/additional-methods.min.js', array( 'jquery' ), $this->version, true );
+		wp_enqueue_script( 'bootstrap4-popper', 'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js', array( 'jquery' ), $this->version, true );
+		wp_enqueue_script( 'bootstrap4-bundle', 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.bundle.min.js', array( 'jquery' ), $this->version, true );
 
 	}
 
 	/**
 	*	Registration Form
 	*/
-	public function registration_form( $deviceID, $first_name, $last_name, $nickname, $username, $password, $email, $address, $city, $phone, $zip ) {
+	public function registration_form( $deviceID, $first_name, $last_name, $nickname, $username, $password, $confirmPassword, $email, $address, $city, $phone, $zip ) {
 	 
 	    echo '
-	    <form action="' . $_SERVER['REQUEST_URI'] . '" method="post">
+		<div class="container">
+      <form id="firebaseSignup" action="' . $_SERVER['REQUEST_URI'] . '" method="post">
 
-	    <div>
-	    <label for="deviceID">Device ID <strong>*</strong></label>
-	    <input id="deviceID" type="text" name="deviceID" value="' . ( isset( $_POST['deviceID']) ? $deviceID : null ) . '" required>
-	    </div>
+        <div class="row justify-content-center">
+          <div class="col-4">
+            <div class="form-group">
+              <label for="deviceID">Device ID <strong>*</strong></label>
+              <input class="form-control" id="deviceID" type="text" name="deviceID" value="' . ( isset( $_POST['deviceID']) ? $deviceID : null ) . '" required>
+            </div>
+          </div>
+          
+          <div class="col-4">
+            <div class="form-group">
+              <label for="nickname">Device Nickname</label>
+              <input class="form-control" id="nickname" type="text" name="nickname" value="' . ( isset( $_POST['nickname']) ? $nickname : null ) . '">
+            </div>
+          </div>
+        </div>
 
-	    <div>
-	    <label for="firstname">First Name <strong>*</strong></label>
-	    <input id="first_name" type="text" name="first_name" value="' . ( isset( $_POST['first_name']) ? $first_name : null ) . '" required>
-	    </div>
-	     
-	    <div>
-	    <label for="website">Last Name <strong>*</strong></label>
-	    <input id="last_name" type="text" name="last_name" value="' . ( isset( $_POST['last_name']) ? $last_name : null ) . '" required>
-	    </div>
-	     
-	    <div>
-	    <label for="nickname">Nickname</label>
-	    <input id="nickname" type="text" name="nickname" value="' . ( isset( $_POST['nickname']) ? $nickname : null ) . '">
-	    </div>
+        <div class="row justify-content-center">           
+          <div class="col-4">
+            <div class="form-group">
+              <label for="firstname">First Name <strong>*</strong></label>
+              <input class="form-control" id="first_name" type="text" name="first_name" value="' . ( isset( $_POST['first_name']) ? $first_name : null ) . '" required>
+            </div>
+          </div>
 
-	    <div>
-	    <label for="username">Username <strong>*</strong></label>
-	    <input id="username" type="text" name="username" value="' . ( isset( $_POST['username'] ) ? $username : null ) . '" required>
-	    </div>
-	     
-	    <div>
-	    <label for="password">Password <strong>*</strong></label>
-	    <input id="password" type="password" name="password" value="' . ( isset( $_POST['password'] ) ? $password : null ) . '" required>
-	    </div>
-	     
-	    <div>
-	    <label for="email">Email <strong>*</strong></label>
-	    <input id="email" type="text" name="email" value="' . ( isset( $_POST['email']) ? $email : null ) . '" required>
-	    </div>
-	     
-	    <div>
-	    <label for="address">Address <strong>*</strong></label>
-	    <input id="address" type="text" name="address" value="' . ( isset( $_POST['address']) ? $address : null ) . '" required>
-	    </div>
+          <div class="col-4">
+            <div class="form-group">
+              <label for="website">Last Name <strong>*</strong></label>
+              <input class="form-control" id="last_name" type="text" name="last_name" value="' . ( isset( $_POST['last_name']) ? $last_name : null ) . '" required>
+            </div>
+          </div>           
+        </div>
 
-	    <div>
-	    <label for="city">City <strong>*</strong></label>
-	    <input id="city" type="text" name="city" value="' . ( isset( $_POST['city']) ? $city : null ) . '" required>
-	    </div>
+        <div class="row justify-content-center">          
+          <div class="col-4">
+            <div class="form-group">
+              <label for="username">Username <strong>*</strong></label>
+              <input class="form-control" id="username" type="text" name="username" value="' . ( isset( $_POST['username'] ) ? $username : null ) . '" required>
+            </div>
+          </div>
 
-	    <div>
-	    <label for="phone">Phone <strong>*</strong></label>
-	    <input id="phone" type="text" name="phone" value="' . ( isset( $_POST['phone']) ? $phone : null ) . '" required>
-	    </div>
+          <div class="col-4">
+            <div class="form-group">
+              <label for="email">Email <strong>*</strong></label>
+              <input class="form-control" id="email" type="text" name="email" value="' . ( isset( $_POST['email']) ? $email : null ) . '" placeholder="" required>
+            </div>
+          </div>
+         </div>
 
-	    <div>
-	    <label for="zip">Zipcode <strong>*</strong></label>
-	    <input id="zip" type="text" name="zip" value="' . ( isset( $_POST['zip']) ? $zip : null ) . '" required>
-	    </div>		
+         <div class="row justify-content-center">
 
-	    <input id="btnRegister" type="submit" name="register" value="Register"/>
-	    </form>
+          <div class="col-4">
+            <div class="form-group">
+              <label for="password">Password <strong>*</strong></label>
+              <input class="form-control" id="password" type="password" name="password" value="' . ( isset( $_POST['password'] ) ? $password : null ) . '" required>
+            </div>
+          </div>
+
+          <div class="col-4">
+            <div class="form-group">
+              <label for="confirmPassword">Confirm Password <strong>*</strong></label>
+              <input class="form-control" id="confirmPassword" type="password" name="confirmPassword" value="' . ( isset( $_POST['confirmPassword'] ) ? $confirmPassword : null ) . '" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="row justify-content-center">
+          <div class="col-4">
+            <div class="form-group">
+              <label for="phone">Phone <strong>*</strong></label>
+              <input class="form-control" id="phone" type="text" name="phone" value="' . ( isset( $_POST['phone']) ? $phone : null ) . '" required>
+            </div>
+          </div>
+          
+          <div class="col-4">
+            <div class="form-group">
+              <label for="zip">Zipcode <strong>*</strong></label>
+              <input class="form-control" id="zip" type="text" name="zip" value="' . ( isset( $_POST['zip']) ? $zip : null ) . '" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="row justify-content-center">          
+          
+          <div class="col-4">
+            <div class="form-group">
+              <label for="address">Address <strong>*</strong></label>
+              <input class="form-control" id="address" type="text" name="address" value="' . ( isset( $_POST['address']) ? $address : null ) . '" required>
+            </div>
+          </div>
+
+          <div class="col-4">
+            <div class="form-group">
+              <label for="city">City <strong>*</strong></label>
+              <input class="form-control" id="city" type="text" name="city" value="' . ( isset( $_POST['city']) ? $city : null ) . '" required>
+            </div>
+          </div>
+        </div>
+
+      <div class="row justify-content-center">
+        <input class="btn btn-primary text-center" id="btnRegister" type="submit" name="register" value="Register"/>
+      </div>
+      <div class="clearfix"></div>
+      </form>
+    </div>
 	    ';
 	}
 
 	/**
 	* Validate Registration Form
 	*/
-	public function registration_validation( $deviceID, $first_name, $last_name, $nickname, $username, $password, $email, $address, $city, $phone, $zip )  {	
+	public function registration_validation( $deviceID, $first_name, $last_name, $nickname, $username, $password, $confirmPassword, $email, $address, $city, $phone, $zip )  {	
 		$this->reg_errors = new WP_Error();
 
-		if ( empty( $username ) || empty( $password ) || empty( $email ) || empty( $first_name ) || empty( $last_name ) || empty( $address ) || empty( $city ) || empty( $phone ) || empty( $zip ) || empty( $deviceID ) ) {
+		if ( empty( $username ) || empty( $password ) || empty( $confirmPassword ) || empty( $email ) || empty( $first_name ) || empty( $last_name ) || empty( $address ) || empty( $city ) || empty( $phone ) || empty( $zip ) || empty( $deviceID ) ) {
 		    $this->reg_errors->add('field', 'Required form field is missing');
 		}
 		if ( 4 > strlen( $username ) ) {
@@ -207,6 +257,10 @@ class Firebase_Public {
 
 		if ( 5 > strlen( $password ) ) {
 	        $this->reg_errors->add( 'password', 'Password length must be greater than 5' );
+	    }
+		
+		if ( $password !== $confirmPassword ) {
+	        $this->reg_errors->add( 'password', 'Password & Confirm Password did not match' );
 	    }
 
 	    if ( !is_email( $email ) ) {
@@ -253,16 +307,17 @@ class Firebase_Public {
 					// Get a reference to the database service
 
 					firebase.database().ref("users/" + "'.$username.'").set({
-						online 		: 	false,
-					   	deviceID 	: 	"'.$deviceID.'",
-					   	username 	: 	"'.$username.'",
-					    firstName 	: 	"'.$first_name.'",
-					    lastName 	: 	"'.$last_name.'",
-					    email 		: 	"'.$email.'",
-					    address 	: 	"'.$address.'",
-					    city 		: 	"'.$city.'",
-					    zipcode 	: 	"'.$zip.'",
-					    phone 		: 	"'.$phone.'"
+						online 			: 	false,
+					   	deviceID 		: 	"'.$deviceID.'",
+						deviceNickname 	: 	"'.$nickname.'",
+					   	username 		: 	"'.$username.'",
+					    firstName 		: 	"'.$first_name.'",
+					    lastName 		: 	"'.$last_name.'",
+					    email 			: 	"'.$email.'",
+					    address 		: 	"'.$address.'",
+					    city 			: 	"'.$city.'",
+					    zipcode 		: 	"'.$zip.'",
+					    phone 			: 	"'.$phone.'"
 					}).then(function(data) {
 						  console.log("Successfully Stored Data! "+ data);
 						}).catch(function (error){
@@ -272,7 +327,14 @@ class Firebase_Public {
 	        </script>';
 	        
 	        $user = wp_insert_user( $userdata );
-	        echo 'Registration complete. Goto <a href="' . get_site_url() . '/wp-login.php">login page</a>.';   
+	        echo '<div class="alert alert-success">Registration complete. Goto <a href="' . get_site_url() . '/login/">login page</a>.</div>
+			<script>
+				(function ($) {
+    				"use strict";
+					$("#firebaseSignup").hide();
+				})(jQuery);
+			</script>
+			';
 	    }
 	}
 
@@ -290,17 +352,19 @@ class Firebase_Public {
 		        $_POST['nickname'],
 		        $_POST['username'],
 		        $_POST['password'],
+				$_POST['confirmPassword'],
 		        $_POST['email'],
 	        	$_POST['address'],
 	        	$_POST['city'],
 	        	$_POST['phone'],
-	        	$_POST['zip']		        
+	        	$_POST['zip']
 	        );
 	         
 	        // sanitize user form input | Security
-	        global $deviceID, $first_name, $last_name, $nickname, $username, $password, $email, $address, $city, $phone, $zip;
+	        global $deviceID, $first_name, $last_name, $nickname, $username, $password, $confirmPassword, $email, $address, $city, $phone, $zip;
 	        $username   	=   sanitize_user( $_POST['username'] );
 	        $password   	=   esc_attr( $_POST['password'] );
+			$confirmPassword   	=   esc_attr( $_POST['confirmPassword'] );
 	        $email      	=   sanitize_email( $_POST['email'] );
 	        $deviceID    	=   esc_url( $_POST['deviceID'] );
 	        $first_name 	=   sanitize_text_field( $_POST['first_name'] );
@@ -337,6 +401,7 @@ class Firebase_Public {
 		        $nickname,
 		        $username,
 		        $password,
+				$confirmPassword,
 		        $email,
 		        $address,
 		        $city,
@@ -375,20 +440,30 @@ class Firebase_Public {
 	public function login_form( $email, $password ) {
 	 
 	    echo '
-	    <form action="' . $_SERVER['REQUEST_URI'] . '" method="post">	     
-	     
-	    <div>
-	    <label for="email">Email <strong>*</strong></label>
-	    <input id="email" type="text" name="email" value="' . ( isset( $_POST['email']) ? $email : null ) . '" required>
-	    </div>
+	    <div class="container">
+      <form id="firebaseLogin" action="' . $_SERVER['REQUEST_URI'] . '" method="post">       
+       
+      <div class="row justify-content-center">
+        <div class="col-4">
+          <div class="form-group">
+            <label for="email">Email <strong>*</strong></label>
+            <input class="form-control" id="email" type="text" name="email" value="' . ( isset( $_POST['email']) ? $email : null ) . '" required>
+          </div>
+        </div>
+        
+        <div class="col-4">
+          <div class="form-group">
+            <label for="password">Password <strong>*</strong></label>
+            <input class="form-control" id="password" type="password" name="password" value="' . ( isset( $_POST['password'] ) ? $password : null ) . '" required>
+          </div>
+        </div>
+      </div>
 
-	    <div>
-	    <label for="password">Password <strong>*</strong></label>
-	    <input id="password" type="password" name="password" value="' . ( isset( $_POST['password'] ) ? $password : null ) . '" required>
-	    </div>
-
-	    <input id="btnLogin" type="submit" name="login" value="Login"/>
-	    </form>
+      <div class="row justify-content-center">
+        <input class="btn btn-primary" id="btnLogin" type="submit" name="login" value="Login"/>
+      </div>
+      </form>
+    </div>
 	    ';
 	}
 
@@ -397,25 +472,31 @@ class Firebase_Public {
 
 	 	if (!empty($user->data->display_name)){
 		    echo '
-			    <form action="' . $_SERVER['REQUEST_URI'] . '" method="post">	     
+				<div class="container">
+			    <form id="firebaseLogout" action="' . $_SERVER['REQUEST_URI'] . '" method="post">	     
 			     
-			    <div>
+			    <div class="row justify-content-center">
 			    	'.$user->data->display_name.' , click on the logout button to logout!
-			    </div>
+			    <p>&nbsp;</p>
 
-			    <input id="btnLogout" type="submit" name="logout" value="Logout"/>
-			    </form>
+			    <input class="btn btn-danger" id="btnLogout" type="submit" name="logout" value="Logout"/>
+			    </div>
+				</form>
+				</div>
 		    ';
 		} else {
 		    echo '
-			    <form action="' . $_SERVER['REQUEST_URI'] . '" method="post">	     
-			     
-			    <div>
-			    	You have successfully Loggedin!
-			    </div>
-
-			    <input id="btnLogout" type="submit" name="logout" value="Logout"/>
+			    <div class="container">
+				<form id="firebaseLogout" action="' . $_SERVER['REQUEST_URI'] . '" method="post">	     
+			     			    
+				<div class="row justify-content-center">
+			    	You have successfully Loggedin!			    
+					<p>&nbsp;</p>
+			    	<input class="btn btn-danger" id="btnLogout" type="submit" name="logout" value="Logout"/>
+				</div>
+				
 			    </form>
+				</div>
 		    ';			
 		}
 	}
@@ -454,7 +535,7 @@ class Firebase_Public {
 	*/
 	public function custom_login_function() {
 	    // Validating Data | Security
-	    // if ( isset($_POST['login']) && wp_verify_nonce($_POST['login_nonce'], 'login-nonce' ) ) {
+	    // if ( isset($_POST['login']) && wp_verify_nonce($_POST['login_nonce'], 'login-nonce' ) ) {	    
 		if ( isset($_POST['login']) ) {
 	        $this->login_validation(
 		        $_POST['email'],
@@ -498,6 +579,11 @@ class Firebase_Public {
 			    );
 			 	
 			    $signin = wp_signon( $creds, false );
+				wp_set_current_user($user->ID);
+				
+				wp_setcookie($creds['user_login'], $creds['user_password'], true);
+				wp_set_current_user($user->ID, $creds['user_login']);	
+				do_action('wp_login', $creds['user_login']);
 			 
 			    if ( is_wp_error( $signin ) ) {
 			        echo $signin->get_error_message();
@@ -521,7 +607,7 @@ class Firebase_Public {
 				        	})( jQuery );
 				        </script>';
 			    }
-				// wp_redirect(home_url()); exit;
+				wp_redirect(get_site_url() . '/profile/'); exit;
 			}
 	    }
 	    if ( isset($_POST['logout']) ) {
@@ -548,7 +634,7 @@ class Firebase_Public {
 	    	wp_logout_url();
 	    }
 	    
-	    if ( !$this->logged_in ) {
+	    if ( !is_user_logged_in() ) {
 		 	//Displaying the login form
 		    $this->login_form(
 		        $email,
@@ -558,5 +644,366 @@ class Firebase_Public {
 			// Displaying the Logout Form
 			$this->logout_form();
 		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/**
+	*	Profile Form
+	*/
+	public function profile_form( $deviceID, $first_name, $last_name, $nickname, $username, $password, $confirmPassword, $email, $address, $city, $phone, $zip ) {
+	 
+	    echo '
+		<div class="container">
+	      <form id="firebaseProfile" action="' . $_SERVER['REQUEST_URI'] . '" method="post">
+			';
+			$devices 	= json_decode($deviceID);
+			$nicknames 	= json_decode($nickname);
+
+			for ($i=0; $i < sizeof($devices); $i++) {
+
+				echo '<div class="row justify-content-center device-'.$i.'">
+		          <div class="col-4">
+		            <div class="form-group">
+		              <label for="deviceID">Device ID <strong>*</strong></label>
+		              <input class="form-control" id="deviceID" type="text" name="deviceID" value="' . $devices[$i] . '" required>
+		            </div>
+		          </div>
+		          
+		          <div class="col-4">
+		            <div class="form-group">
+		              <label for="nickname">Device Nickname</label>
+		              <input class="form-control" id="nickname" type="text" name="nickname" value="' . $nicknames[$i] . '">
+		            </div>
+		          </div>
+		        </div>';
+		    }
+		    echo '<button id="newDevice" class="btn btn-success float-right">Add New Device</button>';
+	        echo '<div class="clearfix"></div>
+	        <div class="row justify-content-center">           
+	          <div class="col-4">
+	            <div class="form-group">
+	              <label for="firstname">First Name <strong>*</strong></label>
+	              <input class="form-control" id="first_name" type="text" name="first_name" value="' . $first_name . '" required>
+	            </div>
+	          </div>
+
+	          <div class="col-4">
+	            <div class="form-group">
+	              <label for="website">Last Name <strong>*</strong></label>
+	              <input class="form-control" id="last_name" type="text" name="last_name" value="' . $last_name . '" required>
+	            </div>
+	          </div>           
+	        </div>
+
+	        <div class="row justify-content-center">          
+	          <div class="col-4">
+	            <div class="form-group">
+	              <label for="username">Username <strong>*</strong></label>
+	              <input class="form-control" id="username" type="text" name="username" value="' . $username . '" required>
+	            </div>
+	          </div>
+
+	          <div class="col-4">
+	            <div class="form-group">
+	              <label for="email">Email <strong>*</strong></label>
+	              <input class="form-control" id="email" type="text" name="email" value="' . $email . '" placeholder="" required>
+	            </div>
+	          </div>
+	         </div>
+
+	         <div class="row justify-content-center password">
+
+	          <div class="col-4">
+	            <div class="form-group">
+	              <label for="password">Password <strong>*</strong></label>
+	              <input class="form-control" id="password" type="password" name="password" value="" required>
+	            </div>
+	          </div>
+
+	          <div class="col-4">
+	            <div class="form-group">
+	              <label for="confirmPassword">Confirm Password <strong>*</strong></label>
+	              <input class="form-control" id="confirmPassword" type="password" name="confirmPassword" value="" required>
+	            </div>
+	          </div>
+	        </div>
+
+	        <div class="row justify-content-center">
+	          <div class="col-4">
+	            <div class="form-group">
+	              <label for="phone">Phone <strong>*</strong></label>
+	              <input class="form-control" id="phone" type="text" name="phone" value="' . $phone . '" required>
+	            </div>
+	          </div>
+	          
+	          <div class="col-4">
+	            <div class="form-group">
+	              <label for="zip">Zipcode <strong>*</strong></label>
+	              <input class="form-control" id="zip" type="text" name="zip" value="' . $zip . '" required>
+	            </div>
+	          </div>
+	        </div>
+
+	        <div class="row justify-content-center">          
+	          
+	          <div class="col-4">
+	            <div class="form-group">
+	              <label for="address">Address <strong>*</strong></label>
+	              <input class="form-control" id="address" type="text" name="address" value="' . $address . '" required>
+	            </div>
+	          </div>
+
+	          <div class="col-4">
+	            <div class="form-group">
+	              <label for="city">City <strong>*</strong></label>
+	              <input class="form-control" id="city" type="text" name="city" value="' . $city . '" required>
+	            </div>
+	          </div>
+	        </div>
+
+	      <div class="row justify-content-center">
+	      	<a id="btnProfile" href="#" class="btn btn-primary">Update Profile</a>
+	        <input class="btn btn-success text-center hidden" id="btnUpdate" type="submit" name="profile" value="Edit Profile"/>
+	      </div>
+	      <div class="clearfix"></div>
+	      </form>
+	    </div>
+	    <script>
+	    	(function( $ ) {
+				"use strict";
+
+				$("#btnProfile").click(function(e){
+					$(this).hide();
+					$("#btnUpdate").show();
+					$("#firebaseProfile").prop("disable", false);
+				});
+
+			})( jQuery );
+	    </script>
+	    ';
+	}
+
+	/**
+	* Validate Profile Form
+	*/
+	public function profile_validation( $deviceID, $first_name, $last_name, $nickname, $username, $password, $confirmPassword, $email, $address, $city, $phone, $zip )  {	
+		
+		$this->profile_errors = new WP_Error();
+		$user = wp_get_current_user();
+
+		if ( empty( $username ) || empty( $password ) || empty( $confirmPassword ) || empty( $email ) || empty( $first_name ) || empty( $last_name ) || empty( $address ) || empty( $city ) || empty( $phone ) || empty( $zip ) || empty( $deviceID ) ) {
+		    $this->profile_errors->add('field', 'Required form field is missing');
+		}
+		if ( 4 > strlen( $username ) ) {
+		    $this->profile_errors->add( 'username_length', 'Username too short. At least 4 characters is required' );
+		}
+		if ( 2 > strlen( $deviceID ) ) {
+		    $this->profile_errors->add( 'deviceID_length', 'Device ID too short. At least 4 characters is required' );
+		}
+		if ( !username_exists( $username ) )
+		    $this->profile_errors->add('user_name', 'Sorry, that username does not exists!');
+
+		if ( ! validate_username( $username ) ) {
+		    $this->profile_errors->add( 'username_invalid', 'Sorry, the username you entered is not valid' );
+		}
+
+		if ( 5 > strlen( $password ) ) {
+	        $this->profile_errors->add( 'password', 'Password length must be greater than 5' );
+	    }
+		
+		if ( $password !== $confirmPassword ) {
+	        $this->profile_errors->add( 'password', 'Password & Confirm Password did not match' );
+	    }
+
+	    if ( !is_email( $email ) ) {
+		    $this->profile_errors->add( 'email_invalid', 'Email is not valid' );
+		}
+
+		if ( is_wp_error( $this->profile_errors ) ) {
+ 
+		    foreach ( $this->profile_errors->get_error_messages() as $error ) {
+		     
+		        echo '<div>';
+		        echo '<strong>ERROR</strong>:';
+		        echo $error . '<br/>';
+		        echo '</div>';
+		         
+		    }
+		 
+		}
+	}
+
+	/**
+	* Complete User Profile
+	*/
+	public function complete_profile($deviceID, $first_name, $last_name, $nickname, $username, $password, $email, $address, $city, $phone, $zip) {
+	
+	    if ( 1 > count( $this->profile_errors->get_error_messages() ) ) {
+	        $userdata = array(
+	        'user_login'    =>   $username,
+	        'user_email'    =>   $email,
+	        'user_pass'     =>   $password,
+	        'first_name'    =>   $first_name,
+	        'last_name'     =>   $last_name,
+	        'nickname'      =>   json_encode($nickname)
+	        );
+	        echo '
+	        <script>
+	        	(function( $ ) {
+					"use strict";
+
+					// Get a reference to the database service
+
+					firebase.database().ref("users/" + "'.$username.'").update({
+						online 			: 	false,
+					   	deviceID 		: 	"'.$deviceID.'",
+						deviceNickname 	: 	"'.$nickname.'",
+					   	username 		: 	"'.$username.'",
+					    firstName 		: 	"'.$first_name.'",
+					    lastName 		: 	"'.$last_name.'",
+					    email 			: 	"'.$email.'",
+					    address 		: 	"'.$address.'",
+					    city 			: 	"'.$city.'",
+					    zipcode 		: 	"'.$zip.'",
+					    phone 			: 	"'.$phone.'"
+					}).then(function(data) {
+						  console.log("Successfully Updated Data! "+ data);
+						}).catch(function (error){
+							 console.log(error);
+					  });
+	        	})( jQuery );
+	        </script>';
+	        
+	        $user = wp_update_user( $userdata );
+	        echo '<div class="alert alert-success">Profile has been updated successfully.</div>
+			<script>
+				(function ($) {
+    				"use strict";
+					$("#firebaseProfile :input").prop("disable", true);
+					$("#btnUpdate").hide();
+					$("#btnProfile").show();
+				})(jQuery);
+			</script>
+			';
+	    }
+	}
+
+	/**
+	*	Main Function to control user registration
+	*/
+	public function custom_profile_function() {
+	    // Validating Data | Security
+	    // if ( isset($_POST['register'] )  && wp_verify_nonce($_POST['registration_nonce'], 'registration_nonce' ) ) {
+		$user = wp_get_current_user();
+		if ( isset($_POST['profile'] ) ) {
+	        $this->profile_validation(
+		        $_POST['deviceID'],
+		        $_POST['first_name'],
+		        $_POST['last_name'],
+		        $_POST['nickname'],
+		        $_POST['username'],
+		        $_POST['password'],
+				$_POST['confirmPassword'],
+		        $_POST['email'],
+	        	$_POST['address'],
+	        	$_POST['city'],
+	        	$_POST['phone'],
+	        	$_POST['zip']
+	        );
+	         
+	        // sanitize user form input | Security
+	        global $deviceID, $first_name, $last_name, $nickname, $username, $password, $confirmPassword, $email, $address, $city, $phone, $zip;
+	        $username   	=   sanitize_user( $_POST['username'] );
+	        $password   	=   esc_attr( $_POST['password'] );
+			$confirmPassword   	=   esc_attr( $_POST['confirmPassword'] );
+	        $email      	=   sanitize_email( $_POST['email'] );
+	        $deviceID    	=   esc_url( $_POST['deviceID'] );
+	        $first_name 	=   sanitize_text_field( $_POST['first_name'] );
+	        $last_name  	=   sanitize_text_field( $_POST['last_name'] );
+	        $nickname   	=   sanitize_text_field( $_POST['nickname'] );
+	        $deviceID 		=   sanitize_text_field( $_POST['deviceID'] );
+	        $address 		=   sanitize_text_field( $_POST['address'] );
+	        $city 			=   sanitize_text_field( $_POST['city'] );
+	        $phone 			=   sanitize_text_field( $_POST['phone'] );
+	        $zip 			=   sanitize_text_field( $_POST['zip'] );
+	 
+	        // call @function complete_registration to create the user
+	        // only when no WP_error is found | Security      
+	        $this->complete_profile(
+		        json_encode($deviceID),
+		        $first_name,
+		        $last_name,
+		        json_encode($nickname),
+		        $username,
+		        $password,
+		        $email,
+		        $address,
+		        $city,
+		        $phone,
+		        $zip
+	        );
+	    }
+	    var_dump($user);
+	 	//Displaying the signup form
+	 	if(is_user_logged_in()) {
+	 		echo '
+	 			<script>
+	 				(function ($) {
+	    				"use strict";
+	    				firebase.database().ref("users/" + "'.$user->data->user_login.'").once("value")
+	    				.then(function(snapshot) {
+							'.$deviceID .'= snapshot.val().deviceID;
+							'.$nickname .'= snapshot.val().deviceNickname;
+							'.$first_name .'= snapshot.val().firstName;
+							'.$last_name .'= snapshot.val().lastName;
+							'.$username .'= snapshot.val().username;
+							'.$email .'= snapshot.val().email;
+							'.$address .'= snapshot.val().address;
+							'.$city .'= snapshot.val().city;
+							'.$phone .'= snapshot.val().phone;
+							'.$zip .'= snapshot.val().zipcode;
+	    				});
+					})(jQuery);
+	 			</script>
+	 		';
+		    $this->profile_form(
+		        $deviceID,
+		        $first_name,
+		        $last_name,
+		        $nickname,
+		        $username,
+		        $password,
+				$confirmPassword,
+		        $email,
+		        $address,
+		        $city,
+		        $phone,
+		        $zip
+		        );
+		} else {
+			
+	    	echo '
+	    		<div class="container">
+	    			<div class="row justify-content-center">
+	    				<div class="col-6">
+	    					<div class="alert alert-danger" role="alert">Please login first to view this page</div>
+	    					<a href="/login/" class="btn btn-primary">Login</a>
+	    				</div>
+	    			</div>
+	    		</div>
+	    	';
+	    }
 	}
 }

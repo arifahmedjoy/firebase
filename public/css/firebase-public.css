@@ -2,3 +2,7 @@
  * All of the CSS for your public-facing functionality should be
  * included in this file.
  */
+.entry-content input[type=text], .entry-content input[type=email], .entry-content input[type=tel], .entry-content input[type=password], .entry-content input[type=date], .entry-content input[type=datetime-local], .entry-content input[type=file], .entry-content input[type=reset], .entry-content input[type=search], .entry-content input[type=url]
+{
+	width: 100% !important;
+}

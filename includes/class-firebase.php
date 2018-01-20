@@ -100,6 +100,17 @@ class Firebase {
 		    return ob_get_clean();
 		}
 
+		// Register a new shortcode: [firebase_profile]
+		add_shortcode( 'firebase_profile', 'custom_profile_shortcode' );
+
+		// The callback function that will replace [firebase_profile]
+		function custom_profile_shortcode() {
+		    ob_start();
+		    $firebase = new Firebase_Public( 'firebase', FIREBASE );
+		    $firebase->custom_profile_function();
+		    return ob_get_clean();
+		}
+
 	}
 
 	/**

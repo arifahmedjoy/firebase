@@ -576,20 +576,26 @@ class Firebase_Public {
 			        'user_login'    => $_POST['email'],
 			        'user_password' => $_POST['password'],
 			        'remember'      => true
-			    );
-			 	
+			    );			 	
+				wp_clear_auth_cookie();
 			    $signin = wp_signon( $creds, false );
-				wp_set_current_user($user->ID);
 				
-				wp_setcookie($creds['user_login'], $creds['user_password'], true);
-				wp_set_current_user($user->ID, $creds['user_login']);	
-				do_action('wp_login', $creds['user_login']);
+          
+				wp_set_current_user( $user->ID, $user->data->user_login );
+// 			    wp_set_auth_cookie( $user->ID, true );
+// 				do_action( 'wp_login', $user->data->user_login );
+// 				wp_redirect(get_site_url() . '/profile/'); exit;
+// 				var_dump($user->ID);
+// 			    do_action( 'wp_login', $user->data->user_login, $user->data->user_login );
+// 				wp_set_current_user( $user->ID );
+// 			    wp_set_auth_cookie( $user->ID, true, false );
 			 
 			    if ( is_wp_error( $signin ) ) {
 			        echo $signin->get_error_message();
 			    } else {
 			    	$this->logged_in = true;
-			    	echo '
+					
+			    	$code = '
 				        <script>
 				        	(function( $ ) {
 								"use strict";
@@ -599,22 +605,23 @@ class Firebase_Public {
 								firebase.database().ref("users/" + "'.$user->data->user_login.'").update({
 								    online : true
 								  })
-								.then(function(data) {
-									  console.log("Successfully Stored Data! "+ data);
+								.then(function() {
+									  console.log("Successfully Stored Data!");
 									}).catch(function (error){
 										 console.log(error);
 								  });
 				        	})( jQuery );
 				        </script>';
+					wp_add_inline_script( 'firebase', $code );
 			    }
-				wp_redirect(get_site_url() . '/profile/'); exit;
+				 wp_redirect(get_site_url() . '/profile/'); exit;
 			}
 	    }
 	    if ( isset($_POST['logout']) ) {
 	    	wp_logout();
 	    	$this->logged_in = false;
 	    	$user = wp_get_current_user();
-	    	echo '
+	    	$code = '
 		        <script>
 		        	(function( $ ) {
 						"use strict";
@@ -631,6 +638,7 @@ class Firebase_Public {
 						  });
 		        	})( jQuery );
 		        </script>';
+			wp_add_inline_script( 'firebase', $code );
 	    	wp_logout_url();
 	    }
 	    
@@ -658,51 +666,73 @@ class Firebase_Public {
 
 
 
-
 	/**
 	*	Profile Form
 	*/
-	public function profile_form( $deviceID, $first_name, $last_name, $nickname, $username, $password, $confirmPassword, $email, $address, $city, $phone, $zip ) {
-	 
-	    echo '
+	public function profile_form( $user ) 
+	{
+	 	?>
+		<script>
+			var firebaseData = [];
+			(function ($) {
+				"use strict";
+				firebase.database().ref("users/" + "<?php echo $user->data->user_login; ?>").once("value")
+				.then(function(snapshot) {
+					snapshot.forEach(function(childSnapshot) {
+						console.log(childSnapshot.val());
+					    firebaseData[childSnapshot.key] = childSnapshot.val();
+					  });
+					$('#deviceID').val(firebaseData['deviceID']);
+					$('#nickname').val(firebaseData['deviceNickname']);
+					$('#first_name').val(firebaseData['firstName']);
+					$('#last_name').val(firebaseData['lastName']);
+					$('#username').val(firebaseData['username']);
+					$('#email').val(firebaseData['email']);
+					$('#address').val(firebaseData['address']);
+					$('#city').val(firebaseData['city']);
+					$('#phone').val(firebaseData['phone']);
+					$('#zip').val(firebaseData['zipcode']);
+					console.log(firebaseData);
+				});
+			})( jQuery );
+		</script>
+	 		
 		<div class="container">
-	      <form id="firebaseProfile" action="' . $_SERVER['REQUEST_URI'] . '" method="post">
-			';
-			$devices 	= json_decode($deviceID);
-			$nicknames 	= json_decode($nickname);
+	      <form id="firebaseProfile" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post">
+			
 
-			for ($i=0; $i < sizeof($devices); $i++) {
+			<div class="row justify-content-center device id-0">
+	          <div class="col-4">
+	            <div class="form-group">
+	              <label for="deviceID">Device ID <strong>*</strong></label>
+	              <input class="form-control" id="deviceID" type="text" name="deviceID" value="" required disabled>
+	            </div>
+	          </div>
+	          
+	          <div class="col-4">
+	            <div class="form-group">
+	              <label for="nickname">Device Nickname <strong>*</strong></label>
+	              <input class="form-control" id="nickname" type="text" name="nickname" value="none" required disabled>
+	            </div>
+	          </div>
+	        </div>
 
-				echo '<div class="row justify-content-center device-'.$i.'">
-		          <div class="col-4">
-		            <div class="form-group">
-		              <label for="deviceID">Device ID <strong>*</strong></label>
-		              <input class="form-control" id="deviceID" type="text" name="deviceID" value="' . $devices[$i] . '" required>
-		            </div>
-		          </div>
-		          
-		          <div class="col-4">
-		            <div class="form-group">
-		              <label for="nickname">Device Nickname</label>
-		              <input class="form-control" id="nickname" type="text" name="nickname" value="' . $nicknames[$i] . '">
-		            </div>
-		          </div>
-		        </div>';
-		    }
-		    echo '<button id="newDevice" class="btn btn-success float-right">Add New Device</button>';
-	        echo '<div class="clearfix"></div>
+
+		    <a href="#firebaseProfile" id="addDevice" class="btn btn-success float-right">Add New Device</a>
+	        
+	        <div class="clearfix"></div>
 	        <div class="row justify-content-center">           
 	          <div class="col-4">
 	            <div class="form-group">
 	              <label for="firstname">First Name <strong>*</strong></label>
-	              <input class="form-control" id="first_name" type="text" name="first_name" value="' . $first_name . '" required>
+	              <input class="form-control" id="first_name" type="text" name="first_name" value="" required disabled>
 	            </div>
 	          </div>
 
 	          <div class="col-4">
 	            <div class="form-group">
 	              <label for="website">Last Name <strong>*</strong></label>
-	              <input class="form-control" id="last_name" type="text" name="last_name" value="' . $last_name . '" required>
+	              <input class="form-control" id="last_name" type="text" name="last_name" value="" required disabled>
 	            </div>
 	          </div>           
 	        </div>
@@ -711,14 +741,14 @@ class Firebase_Public {
 	          <div class="col-4">
 	            <div class="form-group">
 	              <label for="username">Username <strong>*</strong></label>
-	              <input class="form-control" id="username" type="text" name="username" value="' . $username . '" required>
+	              <input class="form-control" id="username" type="text" name="username" value="<?php echo $user->data->user_login; ?>" required disabled>
 	            </div>
 	          </div>
 
 	          <div class="col-4">
 	            <div class="form-group">
 	              <label for="email">Email <strong>*</strong></label>
-	              <input class="form-control" id="email" type="text" name="email" value="' . $email . '" placeholder="" required>
+	              <input class="form-control" id="email" type="text" name="email" value="" placeholder="<?php echo $user->data->user_email; ?>" required disabled>
 	            </div>
 	          </div>
 	         </div>
@@ -728,14 +758,14 @@ class Firebase_Public {
 	          <div class="col-4">
 	            <div class="form-group">
 	              <label for="password">Password <strong>*</strong></label>
-	              <input class="form-control" id="password" type="password" name="password" value="" required>
+	              <input class="form-control" id="password" type="password" name="password" value="nill" required disabled>
 	            </div>
 	          </div>
 
 	          <div class="col-4">
 	            <div class="form-group">
 	              <label for="confirmPassword">Confirm Password <strong>*</strong></label>
-	              <input class="form-control" id="confirmPassword" type="password" name="confirmPassword" value="" required>
+	              <input class="form-control" id="confirmPassword" type="password" name="confirmPassword" value="nill" required disabled>
 	            </div>
 	          </div>
 	        </div>
@@ -744,14 +774,14 @@ class Firebase_Public {
 	          <div class="col-4">
 	            <div class="form-group">
 	              <label for="phone">Phone <strong>*</strong></label>
-	              <input class="form-control" id="phone" type="text" name="phone" value="' . $phone . '" required>
+	              <input class="form-control" id="phone" type="text" name="phone" value="" required disabled>
 	            </div>
 	          </div>
 	          
 	          <div class="col-4">
 	            <div class="form-group">
 	              <label for="zip">Zipcode <strong>*</strong></label>
-	              <input class="form-control" id="zip" type="text" name="zip" value="' . $zip . '" required>
+	              <input class="form-control" id="zip" type="text" name="zip" value="" required disabled>
 	            </div>
 	          </div>
 	        </div>
@@ -761,21 +791,24 @@ class Firebase_Public {
 	          <div class="col-4">
 	            <div class="form-group">
 	              <label for="address">Address <strong>*</strong></label>
-	              <input class="form-control" id="address" type="text" name="address" value="' . $address . '" required>
+	              <input class="form-control" id="address" type="text" name="address" value="" required disabled>
 	            </div>
 	          </div>
 
 	          <div class="col-4">
 	            <div class="form-group">
 	              <label for="city">City <strong>*</strong></label>
-	              <input class="form-control" id="city" type="text" name="city" value="' . $city . '" required>
+	              <input class="form-control" id="city" type="text" name="city" value="" required disabled>
 	            </div>
 	          </div>
 	        </div>
 
 	      <div class="row justify-content-center">
-	      	<a id="btnProfile" href="#" class="btn btn-primary">Update Profile</a>
-	        <input class="btn btn-success text-center hidden" id="btnUpdate" type="submit" name="profile" value="Edit Profile"/>
+	      	<a id="btnProfile" href="#firebaseProfile" class="btn btn-primary">Update Profile</a>
+	      	<span>&nbsp;</span>
+	        <input class="btn btn-success hidden" id="btnUpdate" type="submit" name="profile" value="Edit Profile"/>
+	        <span>&nbsp;</span>
+	        <a id="btnProfileCancel" href="#firebaseProfile" class="btn btn-danger hidden">Cancel</a>
 	      </div>
 	      <div class="clearfix"></div>
 	      </form>
@@ -783,16 +816,50 @@ class Firebase_Public {
 	    <script>
 	    	(function( $ ) {
 				"use strict";
+				var clicked = 0;
+
+				$("#btnUpdate").hide();
+				$("#btnProfileCancel").hide();
 
 				$("#btnProfile").click(function(e){
 					$(this).hide();
 					$("#btnUpdate").show();
-					$("#firebaseProfile").prop("disable", false);
+					$("#btnProfileCancel").show();
+					$("#firebaseProfile").each(function(index, el) {
+					
+						$(this).find("input").removeAttr('disabled');
+
+					});
+				});
+
+				$("#btnProfileCancel").click(function(e){
+					$(this).hide();
+					$("#btnUpdate").hide();
+					$("#btnProfile").show();
+					$("#firebaseProfile").each(function(index, el) {
+					
+						$(this).find("input").attr('disabled');
+
+					});
+				});
+
+				$("#addDevice").click(function(event) {
+					alert(".device.id-"+clicked);
+					$(".device.id-"+clicked).after('<div class="row justify-content-center device id-'+ (clicked+1) +'"><div class="col-4"><div class="form-group"><label for="deviceID">Device ID <strong>*</strong></label><input class="form-control" id="deviceID" type="text" name="deviceID" value="" required></div></div><div class="col-4"><div class="form-group"><label for="nickname">Device Nickname <strong>*</strong></label><input class="form-control" id="nickname" type="text" name="nickname" value="none" required></div></div></div>');
+					$("#btnUpdate").show();
+					$("#btnProfileCancel").show();
+					$("#btnProfile").hide();
+					$("#firebaseProfile").each(function(index, el) {
+					
+						$(this).find("input").removeAttr('disabled');
+
+					});
+					clicked++;
 				});
 
 			})( jQuery );
 	    </script>
-	    ';
+	    <?php
 	}
 
 	/**
@@ -819,7 +886,7 @@ class Firebase_Public {
 		    $this->profile_errors->add( 'username_invalid', 'Sorry, the username you entered is not valid' );
 		}
 
-		if ( 5 > strlen( $password ) ) {
+		if ( $password != 'nill' && 5 > strlen( $password ) ) {
 	        $this->profile_errors->add( 'password', 'Password length must be greater than 5' );
 	    }
 		
@@ -859,6 +926,9 @@ class Firebase_Public {
 	        'last_name'     =>   $last_name,
 	        'nickname'      =>   json_encode($nickname)
 	        );
+	        if($password === 'nill') {
+	        	unset($userdata['user_pass']);
+	        }
 	        echo '
 	        <script>
 	        	(function( $ ) {
@@ -955,43 +1025,12 @@ class Firebase_Public {
 		        $zip
 	        );
 	    }
-	    var_dump($user);
+	   
 	 	//Displaying the signup form
 	 	if(is_user_logged_in()) {
-	 		echo '
-	 			<script>
-	 				(function ($) {
-	    				"use strict";
-	    				firebase.database().ref("users/" + "'.$user->data->user_login.'").once("value")
-	    				.then(function(snapshot) {
-							'.$deviceID .'= snapshot.val().deviceID;
-							'.$nickname .'= snapshot.val().deviceNickname;
-							'.$first_name .'= snapshot.val().firstName;
-							'.$last_name .'= snapshot.val().lastName;
-							'.$username .'= snapshot.val().username;
-							'.$email .'= snapshot.val().email;
-							'.$address .'= snapshot.val().address;
-							'.$city .'= snapshot.val().city;
-							'.$phone .'= snapshot.val().phone;
-							'.$zip .'= snapshot.val().zipcode;
-	    				});
-					})(jQuery);
-	 			</script>
-	 		';
-		    $this->profile_form(
-		        $deviceID,
-		        $first_name,
-		        $last_name,
-		        $nickname,
-		        $username,
-		        $password,
-				$confirmPassword,
-		        $email,
-		        $address,
-		        $city,
-		        $phone,
-		        $zip
-		        );
+	 		
+		    $this->profile_form( $user );
+
 		} else {
 			
 	    	echo '

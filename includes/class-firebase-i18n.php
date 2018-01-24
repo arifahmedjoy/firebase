@@ -1,0 +1,47 @@
+<?php
+
+/**
+ * Define the internationalization functionality
+ *
+ * Loads and defines the internationalization files for this plugin
+ * so that it is ready for translation.
+ *
+ * @link       https://www.arifahmed.info
+ * @since      4.9.5
+ *
+ * @package    Firebase
+ * @subpackage Firebase/includes
+ */
+
+/**
+ * Define the internationalization functionality.
+ *
+ * Loads and defines the internationalization files for this plugin
+ * so that it is ready for translation.
+ *
+ * @since      4.9.5
+ * @package    Firebase
+ * @subpackage Firebase/includes
+ * @author     Arif Ahmed Joy <arif@avalonhosting.services>
+ */
+class Firebase_i18n {
+
+
+	/**
+	 * Load the plugin text domain for translation.
+	 *
+	 * @since    4.9.5
+	 */
+	public function load_plugin_textdomain() {
+
+		load_plugin_textdomain(
+			'firebase',
+			false,
+			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
+		);
+
+	}
+
+
+
+}

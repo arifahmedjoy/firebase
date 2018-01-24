@@ -111,9 +111,9 @@ class Firebase_Public {
 		 * class.
 		 */
 		wp_enqueue_script( $this->firebase, 'https://www.gstatic.com/firebasejs/4.8.1/firebase.js', array( 'jquery' ), $this->version, false );
-		wp_enqueue_script( $this->firebase.'-public', plugin_dir_url( __FILE__ ) . 'js/firebase-public.js', array( 'firebase' ), $this->version, false );
 		wp_enqueue_script( 'bootstrap4-popper', 'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js', array( 'jquery' ), $this->version, true );
 		wp_enqueue_script( 'bootstrap4-bundle', 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.bundle.min.js', array( 'jquery' ), $this->version, true );
+		wp_enqueue_script( $this->firebase.'-public', plugin_dir_url( __FILE__ ) . 'js/firebase-public.js', array( 'firebase' ), $this->version, false );
 
 	}
 
@@ -598,7 +598,7 @@ class Firebase_Public {
 			  //   } else {
 			    	$this->logged_in = true;
 					
-			    	$code = '
+			    	echo '
 				        <script>
 				        	(function( $ ) {
 								"use strict";
@@ -615,9 +615,9 @@ class Firebase_Public {
 								  });
 				        	})( jQuery );
 				        </script>';
-					do_action( 'custom_footer_script', $code );
+					// do_action( 'custom_footer_script', $code );
 			    // }
-				 // wp_redirect(get_site_url() . '/profile/'); exit;
+			 wp_redirect(get_site_url() . '/profile/'); exit;
 			}
 	    }
 	    if ( isset($_POST['logout']) ) {
@@ -680,6 +680,12 @@ class Firebase_Public {
 			var firebaseData = [];
 			(function ($) {
 				"use strict";
+				/**
+				*	Menus to Hide
+				*/
+				$("#menu-item-207").hide();
+				$("#menu-item-217").hide();
+
 				firebase.database().ref("users/" + "<?php echo $user->data->user_login; ?>").once("value")
 				.then(function(snapshot) {
 					snapshot.forEach(function(childSnapshot) {
@@ -860,7 +866,6 @@ class Firebase_Public {
 					});
 					clicked++;
 				});
-
 			})( jQuery );
 	    </script>
 	    <?php

@@ -122,13 +122,13 @@ class Firebase {
 			        'remember'      => true
 			    );
 
-			    $signin = wp_signon( $creds, false );          
-				wp_set_current_user( $user->ID, $creds['user_login'] );
-				wp_set_auth_cookie( $user->ID, true );
+			    $signin = wp_signon( $creds, false );
 
 				if ( is_wp_error( $signin ) ) {
-			        var_dump($signin->get_error_message());
-			        // die();
+			        wp_die($signin->get_error_message());
+			    } else {			    	          
+					wp_set_current_user( $user->ID, $creds['user_login'] );
+					wp_set_auth_cookie( $user->ID, true );
 			    }
 			}
 		}

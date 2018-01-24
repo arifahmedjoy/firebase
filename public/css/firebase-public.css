@@ -6,3 +6,17 @@
 {
 	width: 100% !important;
 }
+
+#primary {
+    float: none !important;
+    margin: 0 auto !important;
+    width: 66.6666%;
+}
+
+div .container {
+	padding: 20px !important;
+}
+
+strong {
+	color: rgb(255,0,0) !important;
+}

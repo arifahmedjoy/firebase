@@ -3,8 +3,13 @@
 /**
  * Register all actions and filters for the plugin
  *
+<<<<<<< HEAD
  * @link       http://example.com
  * @since      1.0.0
+=======
+ * @link       https://www.arifahmed.info
+ * @since      4.9.5
+>>>>>>> a27bb71... RC Version
  *
  * @package    Firebase
  * @subpackage Firebase/includes
@@ -26,7 +31,11 @@ class Firebase_Loader {
 	/**
 	 * The array of actions registered with WordPress.
 	 *
+<<<<<<< HEAD
 	 * @since    1.0.0
+=======
+	 * @since    4.9.5
+>>>>>>> a27bb71... RC Version
 	 * @access   protected
 	 * @var      array    $actions    The actions registered with WordPress to fire when the plugin loads.
 	 */
@@ -35,7 +44,11 @@ class Firebase_Loader {
 	/**
 	 * The array of filters registered with WordPress.
 	 *
+<<<<<<< HEAD
 	 * @since    1.0.0
+=======
+	 * @since    4.9.5
+>>>>>>> a27bb71... RC Version
 	 * @access   protected
 	 * @var      array    $filters    The filters registered with WordPress to fire when the plugin loads.
 	 */
@@ -44,7 +57,11 @@ class Firebase_Loader {
 	/**
 	 * Initialize the collections used to maintain the actions and filters.
 	 *
+<<<<<<< HEAD
 	 * @since    1.0.0
+=======
+	 * @since    4.9.5
+>>>>>>> a27bb71... RC Version
 	 */
 	public function __construct() {
 
@@ -56,7 +73,11 @@ class Firebase_Loader {
 	/**
 	 * Add a new action to the collection to be registered with WordPress.
 	 *
+<<<<<<< HEAD
 	 * @since    1.0.0
+=======
+	 * @since    4.9.5
+>>>>>>> a27bb71... RC Version
 	 * @param    string               $hook             The name of the WordPress action that is being registered.
 	 * @param    object               $component        A reference to the instance of the object on which the action is defined.
 	 * @param    string               $callback         The name of the function definition on the $component.
@@ -70,7 +91,11 @@ class Firebase_Loader {
 	/**
 	 * Add a new filter to the collection to be registered with WordPress.
 	 *
+<<<<<<< HEAD
 	 * @since    1.0.0
+=======
+	 * @since    4.9.5
+>>>>>>> a27bb71... RC Version
 	 * @param    string               $hook             The name of the WordPress filter that is being registered.
 	 * @param    object               $component        A reference to the instance of the object on which the filter is defined.
 	 * @param    string               $callback         The name of the function definition on the $component.
@@ -85,7 +110,11 @@ class Firebase_Loader {
 	 * A utility function that is used to register the actions and hooks into a single
 	 * collection.
 	 *
+<<<<<<< HEAD
 	 * @since    1.0.0
+=======
+	 * @since    4.9.5
+>>>>>>> a27bb71... RC Version
 	 * @access   private
 	 * @param    array                $hooks            The collection of hooks that is being registered (that is, actions or filters).
 	 * @param    string               $hook             The name of the WordPress filter that is being registered.
@@ -112,7 +141,11 @@ class Firebase_Loader {
 	/**
 	 * Register the filters and actions with WordPress.
 	 *
+<<<<<<< HEAD
 	 * @since    1.0.0
+=======
+	 * @since    4.9.5
+>>>>>>> a27bb71... RC Version
 	 */
 	public function run() {
 

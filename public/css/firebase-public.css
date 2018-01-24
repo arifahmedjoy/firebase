@@ -19,4 +19,10 @@ div .container {
 
 strong {
 	color: rgb(255,0,0) !important;
+<<<<<<< HEAD
 }
+=======
+}
+
+.hidden {display: none;}
+>>>>>>> a27bb71... RC Version

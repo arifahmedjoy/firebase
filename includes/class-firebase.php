@@ -6,8 +6,13 @@
  * A class definition that includes attributes and functions used across both the
  * public-facing side of the site and the admin area.
  *
+<<<<<<< HEAD
  * @link       http://example.com
  * @since      1.0.0
+=======
+ * @link       https://www.arifahmed.info
+ * @since      4.9.5
+>>>>>>> a27bb71... RC Version
  *
  * @package    Firebase
  * @subpackage Firebase/includes
@@ -22,7 +27,11 @@
  * Also maintains the unique identifier of this plugin as well as the current
  * version of the plugin.
  *
+<<<<<<< HEAD
  * @since      1.0.0
+=======
+ * @since      4.9.5
+>>>>>>> a27bb71... RC Version
  * @package    Firebase
  * @subpackage Firebase/includes
  * @author     Arif Ahmed Joy <arif@avalonhosting.services>
@@ -33,7 +42,11 @@ class Firebase {
 	 * The loader that's responsible for maintaining and registering all hooks that power
 	 * the plugin.
 	 *
+<<<<<<< HEAD
 	 * @since    1.0.0
+=======
+	 * @since    4.9.5
+>>>>>>> a27bb71... RC Version
 	 * @access   protected
 	 * @var      Firebase_Loader    $loader    Maintains and registers all hooks for the plugin.
 	 */
@@ -42,7 +55,11 @@ class Firebase {
 	/**
 	 * The unique identifier of this plugin.
 	 *
+<<<<<<< HEAD
 	 * @since    1.0.0
+=======
+	 * @since    4.9.5
+>>>>>>> a27bb71... RC Version
 	 * @access   protected
 	 * @var      string    $firebase    The string used to uniquely identify this plugin.
 	 */
@@ -51,7 +68,11 @@ class Firebase {
 	/**
 	 * The current version of the plugin.
 	 *
+<<<<<<< HEAD
 	 * @since    1.0.0
+=======
+	 * @since    4.9.5
+>>>>>>> a27bb71... RC Version
 	 * @access   protected
 	 * @var      string    $version    The current version of the plugin.
 	 */
@@ -64,15 +85,26 @@ class Firebase {
 	 * Load the dependencies, define the locale, and set the hooks for the admin area and
 	 * the public-facing side of the site.
 	 *
+<<<<<<< HEAD
 	 * @since    1.0.0
+=======
+	 * @since    4.9.5
+>>>>>>> a27bb71... RC Version
 	 */
 	public function __construct() {
 		if ( defined( 'FIREBASE' ) ) {
 			$this->version = FIREBASE;
 		} else {
+<<<<<<< HEAD
 			$this->version = '1.0.0';
 		}
 		$this->firebase = 'firebase';
+=======
+			$this->version = '4.9.5';
+		}
+		$this->firebase = 'firebase';
+		
+>>>>>>> a27bb71... RC Version
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -110,6 +142,7 @@ class Firebase {
 		    $firebase->custom_profile_function();
 		    return ob_get_clean();
 		}
+<<<<<<< HEAD
 		function userLogin()
 		{
 			if (isset($_POST['email'])) {		
@@ -139,6 +172,62 @@ class Firebase {
 			echo '<script>'.$script.'</script>';
 		}
 		add_action( 'wp_footer', 'custom_footer_script' );
+=======
+		
+
+		function custom_footer_script($script)
+		{
+			echo '<script>'.$script.'</script>';
+		}
+		add_action( 'wp_footer', 'custom_footer_script' );
+		
+		function userLogin()
+		{
+			$firebase = new Firebase_Public( 'firebase', FIREBASE );
+		    
+			if ( isset($_POST['login']) && wp_verify_nonce($_POST['_firebase_login'], 'firebase_login' ) ) {
+		        
+		        $firebase->login_validation(
+			        $_POST['email'],
+			        $_POST['password'],
+			        false       
+		        );
+
+		        // sanitize user form input | Security
+		        global $email, $password;
+		        $email      	=   sanitize_email( $_POST['email'] );
+		        $password   	=   esc_attr( $_POST['password'] );
+		 
+		        // call @function complete_registration to create the user
+		        // only when no WP_error is found | Security      
+	 
+				// this returns the user ID and other info from the user name
+				$user = get_user_by( 'email', $_POST['email'] );
+				
+				// only log the user in if there are no errors
+				if ( 1 > count( $firebase->login_errors->get_error_messages() ) ) {
+		 			$creds = array(
+				        'user_login'    => $email,
+				        'user_password' => $password,
+				        'remember'      => true
+				    );
+
+				    $signin = wp_signon( $creds, false );
+
+					if ( is_wp_error( $signin ) ) {
+				        echo '<div>';
+				        echo '<strong>ERROR</strong>:';
+				        echo $signin->get_error_message() . '<br/>';
+				        echo '</div>';
+				    } else {			    	          
+						wp_set_current_user( $user->ID, $creds['user_login'] );
+						wp_set_auth_cookie( $user->ID, true );
+				    }
+				}
+			}
+		}
+		add_action( 'plugins_loaded', 'userLogin' );
+>>>>>>> a27bb71... RC Version
 	}
 
 	/**
@@ -154,7 +243,11 @@ class Firebase {
 	 * Create an instance of the loader which will be used to register the hooks
 	 * with WordPress.
 	 *
+<<<<<<< HEAD
 	 * @since    1.0.0
+=======
+	 * @since    4.9.5
+>>>>>>> a27bb71... RC Version
 	 * @access   private
 	 */
 	private function load_dependencies() {
@@ -187,7 +280,11 @@ class Firebase {
 	 * Uses the Firebase_i18n class in order to set the domain and to register the hook
 	 * with WordPress.
 	 *
+<<<<<<< HEAD
 	 * @since    1.0.0
+=======
+	 * @since    4.9.5
+>>>>>>> a27bb71... RC Version
 	 * @access   private
 	 */
 	private function set_locale() {
@@ -202,7 +299,11 @@ class Firebase {
 	 * Register all of the hooks related to the public-facing functionality
 	 * of the plugin.
 	 *
+<<<<<<< HEAD
 	 * @since    1.0.0
+=======
+	 * @since    4.9.5
+>>>>>>> a27bb71... RC Version
 	 * @access   private
 	 */
 	private function define_public_hooks() {
@@ -217,7 +318,11 @@ class Firebase {
 	/**
 	 * Run the loader to execute all of the hooks with WordPress.
 	 *
+<<<<<<< HEAD
 	 * @since    1.0.0
+=======
+	 * @since    4.9.5
+>>>>>>> a27bb71... RC Version
 	 */
 	public function run() {
 		$this->loader->run();
@@ -227,7 +332,11 @@ class Firebase {
 	 * The name of the plugin used to uniquely identify it within the context of
 	 * WordPress and to define internationalization functionality.
 	 *
+<<<<<<< HEAD
 	 * @since     1.0.0
+=======
+	 * @since     4.9.5
+>>>>>>> a27bb71... RC Version
 	 * @return    string    The name of the plugin.
 	 */
 	public function get_firebase() {
@@ -237,7 +346,11 @@ class Firebase {
 	/**
 	 * The reference to the class that orchestrates the hooks with the plugin.
 	 *
+<<<<<<< HEAD
 	 * @since     1.0.0
+=======
+	 * @since     4.9.5
+>>>>>>> a27bb71... RC Version
 	 * @return    Firebase_Loader    Orchestrates the hooks of the plugin.
 	 */
 	public function get_loader() {
@@ -247,7 +360,11 @@ class Firebase {
 	/**
 	 * Retrieve the version number of the plugin.
 	 *
+<<<<<<< HEAD
 	 * @since     1.0.0
+=======
+	 * @since     4.9.5
+>>>>>>> a27bb71... RC Version
 	 * @return    string    The version number of the plugin.
 	 */
 	public function get_version() {

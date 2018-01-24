@@ -9,14 +9,22 @@
  * that starts the plugin.
  *
  * @link              https://avalonhosting.services
+<<<<<<< HEAD
  * @since             1.0.0
+=======
+ * @since             4.9.5
+>>>>>>> a27bb71... RC Version
  * @package           Firebase
  *
  * @wordpress-plugin
  * Plugin Name:       Firebase Plugin for WordPress
  * Plugin URI:        https://avalonhosting.services/wp-firebase/
  * Description:       A firebase communication plugin for coziya.com.
+<<<<<<< HEAD
  * Version:           1.0.0
+=======
+ * Version:           4.9.5
+>>>>>>> a27bb71... RC Version
  * Author:            Arif Ahmed Joy
  * Author URI:        https://avalonhosting.services/
  * License:           MIT
@@ -32,10 +40,17 @@ if ( ! defined( 'WPINC' ) ) {
 
 /**
  * Currently plugin version.
+<<<<<<< HEAD
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
 define( 'FIREBASE', '1.0.0' );
+=======
+ * Start at version 4.9.5 and use SemVer - https://semver.org
+ * Rename this for your plugin and update it as you release new versions.
+ */
+define( 'FIREBASE', '4.9.5' );
+>>>>>>> a27bb71... RC Version
 
 /**
  * The code that runs during plugin activation.
@@ -71,7 +86,11 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-firebase.php';
  * then kicking off the plugin from this point in the file does
  * not affect the page life cycle.
  *
+<<<<<<< HEAD
  * @since    1.0.0
+=======
+ * @since    4.9.5
+>>>>>>> a27bb71... RC Version
  */
 function run_firebase() {
 

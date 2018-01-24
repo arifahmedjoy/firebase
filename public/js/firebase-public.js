@@ -1,6 +1,10 @@
 (function( $ ) {
 	'use strict';
+<<<<<<< HEAD
 	// Initialize Firebase KWwt9d8ElAQMkrdRuLlbjl5BMle2
+=======
+	// Initialize Firebase
+>>>>>>> a27bb71... RC Version
 	const config = {
 		apiKey: 'AIzaSyDRZgadXQnt-QCi58K74ZdSjcWofM_0dWQ',
 		authDomain: 'customer-db-ef864.firebaseapp.com',
@@ -10,7 +14,15 @@
 		messagingSenderId: '822096415910'
 	};
 	firebase.initializeApp(config);
+<<<<<<< HEAD
 	firebase.auth().signInWithEmailAndPassword('firebasetest001@gmail.com', 'chongdingnow');
+=======
+	firebase.auth().signInWithEmailAndPassword('firebasetest001@gmail.com', 'chongdingnow').catch(function(error) {
+	  // Handle Errors here.
+	  console.log(error.code + ': ' + error.message);
+	  // ...
+	});
+>>>>>>> a27bb71... RC Version
 
 	// Get a reference to the database service
 	const database = firebase.database();

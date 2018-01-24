@@ -505,7 +505,7 @@ class Firebase_Public {
 		    		$('.signup').hide("fast");
 		    		$('.login').hide("fast");
 		    		$('.profile').show("fast").after('<form id="firebaseLogout" action="<?php echo get_site_url().'/login/'; ?>" method="post"><input class="btn btn-danger" id="btnLogout" type="submit" name="logout" value="Logout"/></div></form>');
-			 		$(location).attr("href", 'http://wordpress/profile/');
+			 		$(location).attr("href", 'http://cozyia.com/profile/');
 
 		    	})( jQuery );
 		    </script>
@@ -694,7 +694,7 @@ class Firebase_Public {
 	      <form id="firebaseProfile" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post">
 			
 <?php
-	
+
 	$devices = explode(',', get_user_meta($user->ID, 'deviceID', true));
 	$nicknames = explode(',', get_user_meta($user->ID, 'nickname', true));
 	if (sizeof($devices) > 1) {
@@ -724,7 +724,7 @@ class Firebase_Public {
 	          <div class="col-4">
 	            <div class="form-group">
 	              <label for="deviceID">Device ID <strong>*</strong></label>
-	              <input class="form-control" id="deviceID" type="text" name="deviceID[]" value="<?php echo $get_user_meta($user->ID, 'deviceID', true); ?>" required disabled>
+	              <input class="form-control" id="deviceID" type="text" name="deviceID[]" value="<?php echo get_user_meta($user->ID, 'deviceID', true); ?>" required disabled>
 	            </div>
 	          </div>
 	          
@@ -767,7 +767,7 @@ class Firebase_Public {
 	          <div class="col-4">
 	            <div class="form-group">
 	              <label for="email">Email <strong>*</strong></label>
-	              <input class="form-control" id="email" type="text" name="email" value="" placeholder="<?php echo $user->data->user_login; ?>" required disabled>
+	              <input class="form-control" id="email" type="text" name="email" value="<?php echo $user->data->user_email; ?>" placeholder="<?php echo $user->data->user_email; ?>" required disabled>
 	            </div>
 	          </div>
 	         </div>
@@ -972,6 +972,15 @@ class Firebase_Public {
 	        update_user_meta( $user, 'address', $address );
 	        update_user_meta( $user, 'city', $city );
 	        update_user_meta( $user, 'zipcode', $zip );
+
+	        $creds = array(
+		        'user_login'    => $email,
+		        'user_password' => $password,
+		        'remember'      => true
+		    );
+	  //       wp_signon( $creds, false );
+	  //       wp_set_current_user( $userdata['ID'], $creds['user_login'] );
+			// wp_set_auth_cookie( $userdata['ID'], true );
 
 	        echo '
 	        <script>

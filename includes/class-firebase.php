@@ -110,7 +110,35 @@ class Firebase {
 		    $firebase->custom_profile_function();
 		    return ob_get_clean();
 		}
+		function userLogin()
+		{
+			if (isset($_POST['email'])) {		
 
+				$user = get_user_by( 'email', $_POST['email'] );
+				
+				$creds = array(
+			        'user_login'    => $_POST['email'],
+			        'user_password' => $_POST['password'],
+			        'remember'      => true
+			    );
+
+			    $signin = wp_signon( $creds, false );          
+				wp_set_current_user( $user->ID, $creds['user_login'] );
+				wp_set_auth_cookie( $user->ID, true );
+
+				if ( is_wp_error( $signin ) ) {
+			        var_dump($signin->get_error_message());
+			        // die();
+			    }
+			}
+		}
+		add_action( 'plugins_loaded', 'userLogin' );
+
+		function custom_footer_script($script)
+		{
+			echo '<script>'.$script.'</script>';
+		}
+		add_action( 'wp_footer', 'custom_footer_script' );
 	}
 
 	/**

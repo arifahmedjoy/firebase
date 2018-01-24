@@ -533,7 +533,7 @@ class Firebase_Public {
 	/**
 	*	Main Function to control user login
 	*/
-	public function custom_login_function() {
+	public function custom_login_function() {		
 	    // Validating Data | Security
 	    // if ( isset($_POST['login']) && wp_verify_nonce($_POST['login_nonce'], 'login-nonce' ) ) {	    
 		if ( isset($_POST['login']) ) {
@@ -571,28 +571,31 @@ class Firebase_Public {
 	 
 			// only log the user in if there are no errors
 			if ( 1 > count( $this->login_errors->get_error_messages() ) ) {				
+ 			
+	 		// 	$creds = array(
+			 //        'user_login'    => $_POST['email'],
+			 //        'user_password' => $_POST['password'],
+			 //        'remember'      => true
+			 //    );
+			 //    var_dump($creds);
+				// var_dump($user->ID);
+				do_action( 'userLogin', $user);
 
-	 			$creds = array(
-			        'user_login'    => $_POST['email'],
-			        'user_password' => $_POST['password'],
-			        'remember'      => true
-			    );			 	
-				wp_clear_auth_cookie();
-			    $signin = wp_signon( $creds, false );
-				
-          
-				wp_set_current_user( $user->ID, $user->data->user_login );
+				// wp_clear_auth_cookie();
+			 //    $signin = wp_signon( $creds, false );          
+				// wp_set_current_user( $user->ID, $user->data->user_login );
+
 // 			    wp_set_auth_cookie( $user->ID, true );
 // 				do_action( 'wp_login', $user->data->user_login );
 // 				wp_redirect(get_site_url() . '/profile/'); exit;
 // 				var_dump($user->ID);
-// 			    do_action( 'wp_login', $user->data->user_login, $user->data->user_login );
+			    // do_action( 'wp_login', $user->data->user_login, $user->data->user_login );
 // 				wp_set_current_user( $user->ID );
 // 			    wp_set_auth_cookie( $user->ID, true, false );
 			 
-			    if ( is_wp_error( $signin ) ) {
-			        echo $signin->get_error_message();
-			    } else {
+			  //   if ( is_wp_error( $signin ) ) {
+			  //       echo $signin->get_error_message();
+			  //   } else {
 			    	$this->logged_in = true;
 					
 			    	$code = '
@@ -612,9 +615,9 @@ class Firebase_Public {
 								  });
 				        	})( jQuery );
 				        </script>';
-					wp_add_inline_script( 'firebase', $code );
-			    }
-				 wp_redirect(get_site_url() . '/profile/'); exit;
+					do_action( 'custom_footer_script', $code );
+			    // }
+				 // wp_redirect(get_site_url() . '/profile/'); exit;
 			}
 	    }
 	    if ( isset($_POST['logout']) ) {
@@ -653,6 +656,7 @@ class Firebase_Public {
 			$this->logout_form();
 		}
 	}
+	
 
 
 

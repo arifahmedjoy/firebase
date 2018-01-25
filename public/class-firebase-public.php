@@ -306,19 +306,36 @@ class Firebase_Public {
 	        'last_name'     =>   $last_name,
 	        'nickname'      =>   $nickname
 	        );
-	        $user = wp_insert_user( $userdata );
-	        var_dump($user);
+	        $register_user = wp_insert_user( $userdata );
 
-	        /**
-	        *	Adding User's Meta Data
-	        */
-	        add_user_meta( $user, 'deviceID', $deviceID, true );
-	        add_user_meta( $user, 'phone', $phone, true );
+		    if (!is_wp_error($register_user)) {
+		        /**
+		        *	Adding User's Meta Data
+		        */
+		        add_user_meta( $user, 'deviceID', $deviceID, true );
+		        add_user_meta( $user, 'phone', $phone, true );
 
-	        add_user_meta( $user, 'address', $address );
-	        add_user_meta( $user, 'city', $city );
-	        add_user_meta( $user, 'zipcode', $zip );
+		        add_user_meta( $user, 'address', $address );
+		        add_user_meta( $user, 'city', $city );
+		        add_user_meta( $user, 'zipcode', $zip );
 
+		        $creds = array(
+			        'user_login'    => $email,
+			        'user_password' => $password,
+			        'remember'      => true
+			    );
+		        wp_signon( $creds, false );
+		        wp_set_current_user( $register_user, $username );
+		        wp_set_auth_cookie( $register_user );
+
+		        wp_redirect( site_url('profile/') ); exit;
+
+		    } else{
+		        echo '<div>';
+		        echo '<strong>ERROR</strong>:';
+		        echo $register_user->get_error_message() . '<br/>';
+		        echo '</div>';
+		    }
 	        echo '
 	        <script>
 	        	(function( $ ) {
@@ -462,8 +479,8 @@ class Firebase_Public {
 	 		
 		<div class="container">
 	      	<div id="toggle" class="btn-group" role="group" aria-label="Profile Form">
-			  <button id="devices" type="button" class="btn btn-block btn-secondary" aria-pressed="true">My Devices</button>
-			  <button id="infos" type="button" class="btn btn-block btn-secondary">My Information</button>
+			  <button id="devices" type="button" class="btn btn-secondary" aria-pressed="true">My Devices</button>
+			  <button id="infos" type="button" class="btn btn-secondary">My Information</button>
 			</div>
 	      <form id="firebaseProfile" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post">
 		<div id="device">
@@ -600,7 +617,7 @@ class Firebase_Public {
 	        	</div>
 	        </div>
 			<div class="clearfix"></div>
-			
+
 			<?php wp_nonce_field( 'firebase_profile', '_firebase_profile' ); ?>
 	      <div class="row justify-content-center">
 	      	<a id="btnProfile" href="#firebaseProfile" class="btn btn-primary">Update Profile</a>

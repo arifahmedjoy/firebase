@@ -165,6 +165,11 @@ class Firebase {
 			}
 		}
 		add_action( 'plugins_loaded', 'userLogin' );
+
+		add_action( 'login_form_middle', 'add_lost_password_link' );
+		function add_lost_password_link() {
+			return '<a class="float-right" href="'.site_url('wp-login.php?action=lostpassword').'">Lost Password?</a>';
+		}
 	}
 
 	/**

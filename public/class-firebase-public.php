@@ -456,42 +456,26 @@ class Firebase_Public {
 		}
 	}
 
-	public function login_form( $email, $password ) {
-	 
-	    ?>
-	    <script>
-			(function($){
-				"use strict";
+	public function login_form( $email, $password ) {	 
+var_dump(site_url( 'profile/' ));
+		$args = array(
+		        'echo' => true,
+		        'redirect' => site_url( 'profile/' ), 
+		        'form_id' => 'loginform',
+		        'label_email' => __( 'Email' ),
+		        'label_password' => __( 'Password' ),
+		        'label_remember' => __( 'Remember Me' ),
+		        'label_log_in' => __( 'Log In' ),
+		        'id_username' => 'user_login',
+		        'id_password' => 'user_pass',
+		        'id_remember' => 'rememberme',
+		        'id_submit' => 'wp-submit',
+		        'remember' => true,
+		        'value_username' => NULL,
+		        'value_remember' => false );
 
-				$(".profile").hide("fast");
+		wp_login_form( $args );
 
-			})( jQuery );
-		</script>
-	    <div class="container">
-      <form id="firebaseLogin" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post">       
-       
-      <div class="row justify-content-center">
-        <div class="col-4">
-          <div class="form-group">
-            <label for="email">Email <strong>*</strong></label>
-            <input class="form-control" id="email" type="text" name="email" value="<?php echo ( isset( $_POST['email']) ? $email : null ); ?>" required>
-          </div>
-        </div>
-        
-        <div class="col-4">
-          <div class="form-group">
-            <label for="password">Password <strong>*</strong></label>
-            <input class="form-control" id="password" type="password" name="password" value="<?php echo ( isset( $_POST['password'] ) ? $password : null ); ?>" required>
-          </div>
-        </div>
-      </div>
-		<?php wp_nonce_field( 'firebase_login', '_firebase_login' ); ?>
-      <div class="row justify-content-center">
-        <input class="btn btn-primary" id="btnLogin" type="submit" name="login" value="Login"/>
-      </div>
-      </form>
-    </div>
-	 <?php
 	}
 
 	public function logout_form( ) {

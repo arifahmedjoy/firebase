@@ -120,7 +120,7 @@ class Firebase {
 		add_action( 'wp_footer', 'custom_footer_script' );
 		
 		function userLogin()
-		{
+		{			
 			$firebase = new Firebase_Public( 'firebase', FIREBASE );
 		    
 			if ( isset($_POST['login']) && wp_verify_nonce($_POST['_firebase_login'], 'firebase_login' ) ) {
@@ -165,6 +165,82 @@ class Firebase {
 			}
 		}
 		add_action( 'plugins_loaded', 'userLogin' );
+
+		function initMenuControl(){
+			$user = wp_get_current_user();
+			
+			if ( is_user_logged_in() ) {?>				
+				<script>
+					(function($){
+						"use strict";
+
+						$('.signup').hide('fast');
+						$('.login').remove();
+
+						$('.profile').show("fast").after('<li class="menu-item menu-item-type-post_type menu-item-object-page logout"><a href="<?php echo wp_logout_url( home_url() ); ?>" title="logout">Logout</a></li>');
+
+					})( jQuery );
+				</script>
+			<?php } else { ?>
+				<script>
+					(function($){
+						"use strict";
+
+						$('.logout').remove();
+						$('.signup').show('fast').after('<li class="menu-item menu-item-type-post_type menu-item-object-page login"><a class="login" href="<?php echo wp_login_url( site_url('profile/') ); ?>" title="login">Login</a></li>');
+						$('.profile').hide('fast');
+
+					})( jQuery );
+				</script>
+			<?php }
+		}
+		add_action( 'wp_footer', 'initMenuControl', 11 );
+
+		add_action( 'login_form_middle', 'add_lost_password_link' );
+		function add_lost_password_link() {
+			return '<a class="float-right" href="'.site_url('wp-login.php?action=lostpassword').'">Lost Password?</a>';
+		}
+
+		function firebase_login_logo() { ?>
+		    <style type="text/css">
+		    .login.login-action-login.wp-core-ui {
+		    	background-color: #FFF;
+		    }
+	        #login h1 a, .login h1 a {
+	            background-image: url(http://cozyia.com/wp-content/uploads/2018/01/logo.png);
+				height:144px;
+				width:320px;
+				background-size: 320px 144px;
+				background-repeat: no-repeat;
+	        	padding-bottom: 30px;
+	        }
+		    </style>
+		<?php }
+		add_action( 'login_enqueue_scripts', 'firebase_login_logo' );
+
+		function firebase_login_logo_url() {
+		    return home_url();
+		}
+		add_filter( 'login_headerurl', 'firebase_login_logo_url' );
+
+		function firebase_login_logo_url_title() {
+		    return 'Cozyia';
+		}
+		add_filter( 'login_headertitle', 'firebase_login_logo_url_title' );
+
+		add_filter( 'register_url', 'my_register_page' );
+		function my_register_page( $register_url ) {
+		    return home_url( 'signup/' );
+		}
+
+		function auto_login_new_user( $user_id ) {
+	        wp_set_current_user($user_id);
+	        wp_set_auth_cookie($user_id);
+
+	        wp_redirect( home_url('profile/') );
+	        exit;
+	    }
+	    add_action( 'user_register', 'auto_login_new_user' );
 	}
 
 	/**

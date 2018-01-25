@@ -122,11 +122,6 @@ class Firebase_Public {
 	*/
 	public function registration_form( $deviceID, $first_name, $last_name, $nickname, $username, $password, $confirmPassword, $email, $address, $city, $phone, $zip ) {	 
 	    ?>
-	<script>
-		(function($){
-			$(".profile").hide("fast");
-		})( jQuery );
-	</script>
 	<div class="container">
       <form id="firebaseSignup" action="<?php echo $_SERVER['REQUEST_URI'] ?>" method="post">
 
@@ -311,19 +306,36 @@ class Firebase_Public {
 	        'last_name'     =>   $last_name,
 	        'nickname'      =>   $nickname
 	        );
-	        $user = wp_insert_user( $userdata );
-	        var_dump($user);
+	        $register_user = wp_insert_user( $userdata );
 
-	        /**
-	        *	Adding User's Meta Data
-	        */
-	        add_user_meta( $user, 'deviceID', $deviceID, true );
-	        add_user_meta( $user, 'phone', $phone, true );
+		    if (!is_wp_error($register_user)) {
+		        /**
+		        *	Adding User's Meta Data
+		        */
+		        add_user_meta( $user, 'deviceID', $deviceID, true );
+		        add_user_meta( $user, 'phone', $phone, true );
 
-	        add_user_meta( $user, 'address', $address );
-	        add_user_meta( $user, 'city', $city );
-	        add_user_meta( $user, 'zipcode', $zip );
+		        add_user_meta( $user, 'address', $address );
+		        add_user_meta( $user, 'city', $city );
+		        add_user_meta( $user, 'zipcode', $zip );
 
+		        $creds = array(
+			        'user_login'    => $email,
+			        'user_password' => $password,
+			        'remember'      => true
+			    );
+		        wp_signon( $creds, false );
+		        wp_set_current_user( $register_user, $username );
+		        wp_set_auth_cookie( $register_user );
+
+		        wp_redirect( site_url('profile/') ); exit;
+
+		    } else{
+		        echo '<div>';
+		        echo '<strong>ERROR</strong>:';
+		        echo $register_user->get_error_message() . '<br/>';
+		        echo '</div>';
+		    }
 	        echo '
 	        <script>
 	        	(function( $ ) {
@@ -332,7 +344,6 @@ class Firebase_Public {
 					// Get a reference to the database service
 
 					firebase.database().ref("users/" + "'.$username.'").set({
-						online 			: 	false,
 					   	deviceID 		: 	"'.$deviceID.'",
 						deviceNickname 	: 	"'.$nickname.'",
 					   	username 		: 	"'.$username.'",
@@ -427,232 +438,8 @@ class Firebase_Public {
 		        $phone,
 		        $zip
 		        );
-		} else {
-			// Displaying the Logout Form
-			$this->logout_form();
-			if ( isset($_POST['logout']) ) {
-		    	wp_logout();
-		    	$this->logged_in = false;
-		    	$user = wp_get_current_user();
-		    	echo '
-			        <script>
-			        	(function( $ ) {
-							"use strict";
-
-							// Get a reference to the database service
-
-							firebase.database().ref("users/" + "'.$user->data->user_login.'").update({
-							    online : false
-							  })
-							.then(function(data) {
-								  console.log("Successfully Stored Data! "+ data);
-								}).catch(function (error){
-									 console.log(error);
-							  });
-			        	})( jQuery );
-			        </script>';
-		    	wp_logout_url();
-		    }
 		}
 	}
-
-	public function login_form( $email, $password ) {
-	 
-	    ?>
-	    <script>
-			(function($){
-				"use strict";
-
-				$(".profile").hide("fast");
-
-			})( jQuery );
-		</script>
-	    <div class="container">
-      <form id="firebaseLogin" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post">       
-       
-      <div class="row justify-content-center">
-        <div class="col-4">
-          <div class="form-group">
-            <label for="email">Email <strong>*</strong></label>
-            <input class="form-control" id="email" type="text" name="email" value="<?php echo ( isset( $_POST['email']) ? $email : null ); ?>" required>
-          </div>
-        </div>
-        
-        <div class="col-4">
-          <div class="form-group">
-            <label for="password">Password <strong>*</strong></label>
-            <input class="form-control" id="password" type="password" name="password" value="<?php echo ( isset( $_POST['password'] ) ? $password : null ); ?>" required>
-          </div>
-        </div>
-      </div>
-		<?php wp_nonce_field( 'firebase_login', '_firebase_login' ); ?>
-      <div class="row justify-content-center">
-        <input class="btn btn-primary" id="btnLogin" type="submit" name="login" value="Login"/>
-      </div>
-      </form>
-    </div>
-	 <?php
-	}
-
-	public function logout_form( ) {
-	 	$user = wp_get_current_user();	 	
-
-	 	if (!empty($user->data->display_name)){
-		    ?>
-		    <script>
-		    	(function($){
-		    		"use strict";
-		    		$('.signup').hide("fast");
-		    		$('.login').hide("fast");
-		    		$('.profile').show("fast").after('<form id="firebaseLogout" action="<?php echo get_site_url().'/login/'; ?>" method="post"><input class="btn btn-danger" id="btnLogout" type="submit" name="logout" value="Logout"/></div></form>');
-			 		$(location).attr("href", 'http://cozyia.com/profile/');
-
-		    	})( jQuery );
-		    </script>
-			    
-		    <?php
-		}
-	}
-
-	public function login_validation( $email, $password, $error = true )  {
-		
-		$this->login_errors = new WP_Error();
-		$user = get_user_by( 'email', $_POST['email'] );
-
-		if ( empty( $password ) || empty( $email ) ) {
-		    $this->login_errors->add('field', 'Required form field is missing');
-		}
-
-	    if ( !is_email( $email ) ) {
-		    $this->login_errors->add( 'email_invalid', 'Email is not valid' );
-		}
-
-		if ( !email_exists( $email ) ) {
-		    $this->login_errors->add( 'email', 'Email does not exist in our system!' );
-		}
-
-		if(!isset($_POST['password']) || $_POST['password'] == '') {
-			// if no password was entered
-			$this->login_errors->add('empty_password', 'Please enter a password');
-		}
- 
-		// check the user's login with their password
-		if($user)
-		{
-			if(!wp_check_password($_POST['password'], $user->data->user_pass, $user->ID)) {
-				// if the password is incorrect for the specified user
-				$this->login_errors->add('empty_password','Incorrect password');
-			}
-		}
-
-		if ( is_wp_error( $this->login_errors ) && $error ) {
- 
-		    foreach ( $this->login_errors->get_error_messages() as $error ) {
-		     
-		        echo '<div>';
-		        echo '<strong>ERROR</strong>:';
-		        echo $error . '<br/>';
-		        echo '</div>';
-		         
-		    }
-		 
-		}
-	}
-
-	/**
-	*	Main Function to control user login
-	*/
-	public function custom_login_function() {		
-	    // Validating Data | Security
-	    if ( isset($_POST['login']) && wp_verify_nonce($_POST['_firebase_login'], 'firebase_login' ) ) {
-	    echo "NONCE Validated!";	    
-	        $this->login_validation(
-		        $_POST['email'],
-		        $_POST['password']	        
-	        );
-	         
-	        // sanitize user form input | Security
-	        global $email, $password;
-	        $email      	=   sanitize_email( $_POST['email'] );
-	        $password   	=   esc_attr( $_POST['password'] );
-	 
-	        // call @function complete_registration to create the user
-	        // only when no WP_error is found | Security		
-			
-			// only log the user in if there are no errors
-			if ( 1 > count( $this->login_errors->get_error_messages() ) ) {
-				echo "string";
-			    	$this->logged_in = true;
-					
-			    	echo '
-				        <script>
-				        	(function( $ ) {
-								"use strict";
-
-								// Get a reference to the database service
-
-								firebase.database().ref("users/" + "'.$user->data->user_login.'").update({
-								    online : true
-								  })
-								.then(function() {
-									  console.log("Successfully Stored Data!");
-									}).catch(function (error){
-										 console.log(error);
-								  });
-				        	})( jQuery );
-				        </script>';
-
-			 wp_redirect(get_site_url() . '/profile/'); exit;
-			}
-	    }
-	    if ( isset($_POST['logout']) ) {
-	    	wp_logout();
-	    	$this->logged_in = false;
-	    	$user = wp_get_current_user();
-	    	echo '
-		        <script>
-		        	(function( $ ) {
-						"use strict";
-
-						// Get a reference to the database service
-
-						firebase.database().ref("users/" + "'.$user->data->user_login.'").update({
-						    online : false
-						  })
-						.then(function(data) {
-							  console.log("Successfully Stored Data! "+ data);
-							}).catch(function (error){
-								 console.log(error);
-						  });
-		        	})( jQuery );
-		        </script>';
-	    	wp_logout_url();
-	    }
-	    
-	    if ( !is_user_logged_in() ) {
-		 	//Displaying the login form
-		    $this->login_form(
-		        $email,
-		        $password
-	        );
-		} else {
-			// Displaying the Logout Form
-			$this->logout_form();
-		}
-	}
-	
-
-
-
-
-
-
-
-
-
-
-
-
 
 	/**
 	*	Profile Form
@@ -660,14 +447,14 @@ class Firebase_Public {
 	public function profile_form( $user ) 
 	{
 	 	?>
-		<script>
+		<!-- <script>
 			var firebaseData = [];
 			(function ($) {
 				"use strict";
 				// Hide Links
-				$(".signup").hide("fast");
-				$(".login").hide("fast");
-				$('.profile').show("fast").after('<form id="firebaseLogout" action="<?php echo get_site_url().'/login/'; ?>" method="post"><input class="btn btn-danger" id="btnLogout" type="submit" name="logout" value="Logout"/></div></form>');
+				// $(".signup").hide("fast");
+				// $(".login").hide("fast");
+				// $('.profile').show("fast").after('<a href="<?php echo wp_logout_url(); ?>" class="col-2 btn btn-danger" title="logout">Logout</a>');
 				// Incase PHP Function Does Not Work
 				// firebase.database().ref("users/" + "<?php echo $user->data->user_login; ?>").once("value")
 				// .then(function(snapshot) {
@@ -688,10 +475,15 @@ class Firebase_Public {
 				// 	// console.log(firebaseData); //For Debug Only
 				// });
 			})( jQuery );
-		</script>
+		</script> -->
 	 		
 		<div class="container">
+	      	<div id="toggle" class="btn-group" role="group" aria-label="Profile Form">
+			  <button id="devices" type="button" class="btn btn-secondary" aria-pressed="true">My Devices</button>
+			  <button id="infos" type="button" class="btn btn-secondary">My Information</button>
+			</div>
 	      <form id="firebaseProfile" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post">
+		<div id="device">
 			
 <?php
 
@@ -705,14 +497,14 @@ class Firebase_Public {
 			<div class="row justify-content-center device id-0">
 	          <div class="col-4">
 	            <div class="form-group">
-	              <label for="deviceID">Device ID <?php echo $i; ?><strong>*</strong></label>
+	              <label for="deviceID-<?php echo $i; ?>">Device ID <?php echo $i; ?><strong>*</strong></label>
 	              <input class="form-control" id="deviceID-<?php echo $i; ?>" type="text" name="deviceID[]" value="<?php echo $devices[$i]; ?>" required disabled>
 	            </div>
 	          </div>
 	          
 	          <div class="col-4">
 	            <div class="form-group">
-	              <label for="nickname">Device Nickname <?php echo $i; ?><strong>*</strong></label>
+	              <label for="nickname-<?php echo $i; ?>">Device Nickname <?php echo $i; ?><strong>*</strong></label>
 	              <input class="form-control" id="nickname-<?php echo $i; ?>" type="text" name="nickname[]" value="<?php echo $nicknames[$i]; ?>" required disabled>
 	            </div>
 	          </div>
@@ -737,90 +529,95 @@ class Firebase_Public {
 	        </div>
 	<?php }	?>
 
-		    <a href="#firebaseProfile" id="addDevice" class="btn btn-success float-right">Add New Device</a>
+		    <a href="#firebaseProfile" id="addDevice" class="btn btn-success float-center">Add New Device</a>
 	        
+</div>
 	        <div class="clearfix"></div>
-	        <div class="row justify-content-center">           
-	          <div class="col-4">
-	            <div class="form-group">
-	              <label for="firstname">First Name <strong>*</strong></label>
-	              <input class="form-control" id="first_name" type="text" name="first_name" value="<?php echo get_user_meta($user->ID, 'first_name', true); ?>" required disabled>
-	            </div>
-	          </div>
-
-	          <div class="col-4">
-	            <div class="form-group">
-	              <label for="website">Last Name <strong>*</strong></label>
-	              <input class="form-control" id="last_name" type="text" name="last_name" value="<?php echo get_user_meta($user->ID, 'last_name', true); ?>" required disabled>
-	            </div>
-	          </div>           
+	        <div id="info">
+	        	<div class="row justify-content-center">           
+	        	  <div class="col-4">
+	        	    <div class="form-group">
+	        	      <label for="firstname">First Name <strong>*</strong></label>
+	        	      <input class="form-control" id="first_name" type="text" name="first_name" value="<?php echo get_user_meta($user->ID, 'first_name', true); ?>" required disabled>
+	        	    </div>
+	        	  </div>
+	        	
+	        	  <div class="col-4">
+	        	    <div class="form-group">
+	        	      <label for="website">Last Name <strong>*</strong></label>
+	        	      <input class="form-control" id="last_name" type="text" name="last_name" value="<?php echo get_user_meta($user->ID, 'last_name', true); ?>" required disabled>
+	        	    </div>
+	        	  </div>           
+	        	</div>
+	        	
+	        	<div class="row justify-content-center">          
+	        	  <div class="col-4">
+	        	    <div class="form-group">
+	        	      <label for="username">Username <strong>*</strong></label>
+	        	      <input class="form-control" id="username" type="text" name="username" value="<?php echo $user->data->user_login; ?>" required disabled>
+	        	    </div>
+	        	  </div>
+	        	
+	        	  <div class="col-4">
+	        	    <div class="form-group">
+	        	      <label for="email">Email <strong>*</strong></label>
+	        	      <input class="form-control" id="email" type="text" name="email" value="<?php echo $user->data->user_email; ?>" placeholder="<?php echo $user->data->user_email; ?>" required disabled>
+	        	    </div>
+	        	  </div>
+	        	 </div>
+	        	
+	        	 <div class="row justify-content-center password">
+	        	
+	        	  <div class="col-4">
+	        	    <div class="form-group">
+	        	      <label for="password">Password <strong>*</strong></label>
+	        	      <input class="form-control" id="password" type="password" name="password" value="nill" required disabled>
+	        	    </div>
+	        	  </div>
+	        	
+	        	  <div class="col-4">
+	        	    <div class="form-group">
+	        	      <label for="confirmPassword">Confirm Password <strong>*</strong></label>
+	        	      <input class="form-control" id="confirmPassword" type="password" name="confirmPassword" value="nill" required disabled>
+	        	    </div>
+	        	  </div>
+	        	</div>
+	        	
+	        	<div class="row justify-content-center">
+	        	  <div class="col-4">
+	        	    <div class="form-group">
+	        	      <label for="phone">Phone <strong>*</strong></label>
+	        	      <input class="form-control" id="phone" type="text" name="phone" value="<?php echo get_user_meta($user->ID, 'phone', true); ?>" required disabled>
+	        	    </div>
+	        	  </div>
+	        	  
+	        	  <div class="col-4">
+	        	    <div class="form-group">
+	        	      <label for="zip">Zipcode <strong>*</strong></label>
+	        	      <input class="form-control" id="zip" type="text" name="zip" value="<?php echo get_user_meta($user->ID, 'zipcode', true); ?>" required disabled>
+	        	    </div>
+	        	  </div>
+	        	</div>
+	        	
+	        	<div class="row justify-content-center">          
+	        	  
+	        	  <div class="col-4">
+	        	    <div class="form-group">
+	        	      <label for="address">Address <strong>*</strong></label>
+	        	      <input class="form-control" id="address" type="text" name="address" value="<?php echo get_user_meta($user->ID, 'address', true); ?>" required disabled>
+	        	    </div>
+	        	  </div>
+	        	
+	        	  <div class="col-4">
+	        	    <div class="form-group">
+	        	      <label for="city">City <strong>*</strong></label>
+	        	      <input class="form-control" id="city" type="text" name="city" value="<?php echo get_user_meta($user->ID, 'city', true); ?>" required disabled>
+	        	    </div>
+	        	  </div>
+	        	</div>
 	        </div>
+			<div class="clearfix"></div>
 
-	        <div class="row justify-content-center">          
-	          <div class="col-4">
-	            <div class="form-group">
-	              <label for="username">Username <strong>*</strong></label>
-	              <input class="form-control" id="username" type="text" name="username" value="<?php echo $user->data->user_login; ?>" required disabled>
-	            </div>
-	          </div>
-
-	          <div class="col-4">
-	            <div class="form-group">
-	              <label for="email">Email <strong>*</strong></label>
-	              <input class="form-control" id="email" type="text" name="email" value="<?php echo $user->data->user_email; ?>" placeholder="<?php echo $user->data->user_email; ?>" required disabled>
-	            </div>
-	          </div>
-	         </div>
-
-	         <div class="row justify-content-center password">
-
-	          <div class="col-4">
-	            <div class="form-group">
-	              <label for="password">Password <strong>*</strong></label>
-	              <input class="form-control" id="password" type="password" name="password" value="nill" required disabled>
-	            </div>
-	          </div>
-
-	          <div class="col-4">
-	            <div class="form-group">
-	              <label for="confirmPassword">Confirm Password <strong>*</strong></label>
-	              <input class="form-control" id="confirmPassword" type="password" name="confirmPassword" value="nill" required disabled>
-	            </div>
-	          </div>
-	        </div>
-
-	        <div class="row justify-content-center">
-	          <div class="col-4">
-	            <div class="form-group">
-	              <label for="phone">Phone <strong>*</strong></label>
-	              <input class="form-control" id="phone" type="text" name="phone" value="<?php echo get_user_meta($user->ID, 'phone', true); ?>" required disabled>
-	            </div>
-	          </div>
-	          
-	          <div class="col-4">
-	            <div class="form-group">
-	              <label for="zip">Zipcode <strong>*</strong></label>
-	              <input class="form-control" id="zip" type="text" name="zip" value="<?php echo get_user_meta($user->ID, 'zipcode', true); ?>" required disabled>
-	            </div>
-	          </div>
-	        </div>
-
-	        <div class="row justify-content-center">          
-	          
-	          <div class="col-4">
-	            <div class="form-group">
-	              <label for="address">Address <strong>*</strong></label>
-	              <input class="form-control" id="address" type="text" name="address" value="<?php echo get_user_meta($user->ID, 'address', true); ?>" required disabled>
-	            </div>
-	          </div>
-
-	          <div class="col-4">
-	            <div class="form-group">
-	              <label for="city">City <strong>*</strong></label>
-	              <input class="form-control" id="city" type="text" name="city" value="<?php echo get_user_meta($user->ID, 'city', true); ?>" required disabled>
-	            </div>
-	          </div>
-	        </div>
 			<?php wp_nonce_field( 'firebase_profile', '_firebase_profile' ); ?>
 	      <div class="row justify-content-center">
 	      	<a id="btnProfile" href="#firebaseProfile" class="btn btn-primary">Update Profile</a>
@@ -836,6 +633,18 @@ class Firebase_Public {
 	    	(function( $ ) {
 				"use strict";
 				var clicked = "<?php echo sizeof($devices) ?>";
+				
+				$('#info').hide('fast');
+				$('#device').show('fast');
+
+				$('#devices').click(function(event) {
+					$('#info').hide('fast');
+					$('#device').show('fast');
+				});
+				$('#infos').click(function(event) {
+					$('#device').hide('fast');
+					$('#info').show('fast');
+				});
 
 				$("#btnUpdate").hide("fast");
 				$("#btnProfileCancel").hide("fast");
@@ -849,6 +658,7 @@ class Firebase_Public {
 						$(this).find("input").removeAttr('disabled');
 
 					});
+					$("#username").attr('disabled', 'disabled');
 				});
 
 				$("#btnProfileCancel").click(function(e){
@@ -872,6 +682,7 @@ class Firebase_Public {
 						$(this).find("input").removeAttr('disabled');
 
 					});
+					$("#username").attr('disabled', 'disabled');
 					clicked++;
 				});
 
@@ -973,15 +784,6 @@ class Firebase_Public {
 	        update_user_meta( $user, 'city', $city );
 	        update_user_meta( $user, 'zipcode', $zip );
 
-	        $creds = array(
-		        'user_login'    => $email,
-		        'user_password' => $password,
-		        'remember'      => true
-		    );
-	  //       wp_signon( $creds, false );
-	  //       wp_set_current_user( $userdata['ID'], $creds['user_login'] );
-			// wp_set_auth_cookie( $userdata['ID'], true );
-
 	        echo '
 	        <script>
 	        	(function( $ ) {
@@ -990,7 +792,6 @@ class Firebase_Public {
 					// Get a reference to the database service
 
 					firebase.database().ref("users/" + "'.$username.'").update({
-						online 			: 	false,
 					   	deviceID 		: 	"'.$deviceID.'",
 						deviceNickname 	: 	"'.$nickname.'",
 					   	username 		: 	"'.$username.'",
@@ -1028,8 +829,7 @@ class Firebase_Public {
 	public function custom_profile_function() {
 		$user = wp_get_current_user();
 	    // Validating Data | Security
-	    if ( isset($_POST['profile'] )  && wp_verify_nonce($_POST['_firebase_profile'], 'firebase_profile' ) ) {
-	    	echo "NONCE Validated!";
+	    if ( isset($_POST['profile'] )  && wp_verify_nonce($_POST['_firebase_profile'], 'firebase_profile' ) ) {	    	
 
 	        $this->profile_validation(
 		        $_POST['deviceID'],
@@ -1084,18 +884,6 @@ class Firebase_Public {
 	 		
 		    $this->profile_form( $user );
 
-		} else {
-			
-	    	echo '
-	    		<div class="container">
-	    			<div class="row justify-content-center">
-	    				<div class="col-6">
-	    					<div class="alert alert-danger" role="alert">Please login first to view this page</div>
-	    					<a href="/login/" class="btn btn-primary">Login</a>
-	    				</div>
-	    			</div>
-	    		</div>
-	    	';
-	    }
+		}
 	}
 }

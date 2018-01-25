@@ -22,3 +22,5 @@ strong {
 }
 
 .hidden {display: none;}
+
+#bitnami-banner {display: none !important;}

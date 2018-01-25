@@ -177,7 +177,7 @@ class Firebase {
 						$('.signup').hide('fast');
 						$('.login').remove();
 
-						$('.profile').show("fast").after('<li class="menu-item menu-item-type-post_type menu-item-object-page logout"><a href="<?php echo wp_logout_url( home_url() ); ?>" title="log out">Log out</a></li>');
+						$('.profile').show("fast").after('<li class="menu-item menu-item-type-post_type menu-item-object-page logout"><a href="<?php echo wp_logout_url( home_url() ); ?>" title="logout">Logout</a></li>');
 
 					})( jQuery );
 				</script>
@@ -187,7 +187,7 @@ class Firebase {
 						"use strict";
 
 						$('.logout').remove();
-						$('.signup').show('fast').after('<li class="menu-item menu-item-type-post_type menu-item-object-page login"><a class="login" href="<?php echo wp_login_url( site_url('profile/') ); ?>" title="log in">Log in</a></li>');
+						$('.signup').show('fast').after('<li class="menu-item menu-item-type-post_type menu-item-object-page login"><a class="login" href="<?php echo wp_login_url( site_url('profile/') ); ?>" title="login">Login</a></li>');
 						$('.profile').hide('fast');
 
 					})( jQuery );
@@ -224,9 +224,23 @@ class Firebase {
 		add_filter( 'login_headerurl', 'firebase_login_logo_url' );
 
 		function firebase_login_logo_url_title() {
-		    return 'Your Site Name and Info';
+		    return 'Cozyia';
 		}
 		add_filter( 'login_headertitle', 'firebase_login_logo_url_title' );
+
+		add_filter( 'register_url', 'my_register_page' );
+		function my_register_page( $register_url ) {
+		    return home_url( 'signup/' );
+		}
+
+		function auto_login_new_user( $user_id ) {
+	        wp_set_current_user($user_id);
+	        wp_set_auth_cookie($user_id);
+
+	        wp_redirect( home_url('profile/') );
+	        exit;
+	    }
+	    add_action( 'user_register', 'auto_login_new_user' );
 	}
 
 	/**

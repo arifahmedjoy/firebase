@@ -122,11 +122,6 @@ class Firebase_Public {
 	*/
 	public function registration_form( $deviceID, $first_name, $last_name, $nickname, $username, $password, $confirmPassword, $email, $address, $city, $phone, $zip ) {	 
 	    ?>
-	<script>
-		(function($){
-			$(".profile").hide("fast");
-		})( jQuery );
-	</script>
 	<div class="container">
       <form id="firebaseSignup" action="<?php echo $_SERVER['REQUEST_URI'] ?>" method="post">
 
@@ -457,7 +452,7 @@ class Firebase_Public {
 	}
 
 	public function login_form( $email, $password ) {	 
-var_dump(site_url( 'profile/' ));
+
 		$args = array(
 		        'echo' => true,
 		        'redirect' => site_url( 'profile/' ), 
@@ -488,8 +483,7 @@ var_dump(site_url( 'profile/' ));
 		    		"use strict";
 		    		$('.signup').hide("fast");
 		    		$('.login').hide("fast");
-		    		$('.profile').show("fast").after('<form id="firebaseLogout" action="<?php echo get_site_url().'/login/'; ?>" method="post"><input class="btn btn-danger" id="btnLogout" type="submit" name="logout" value="Logout"/></div></form>');
-			 		$(location).attr("href", 'http://cozyia.com/profile/');
+		    		$('.profile').show("fast").after('<a href="<?php echo wp_logout_url(); ?>" class="col-2 btn btn-danger" title="logout">Logout</a>');
 
 		    	})( jQuery );
 		    </script>
@@ -548,47 +542,7 @@ var_dump(site_url( 'profile/' ));
 	*/
 	public function custom_login_function() {		
 	    // Validating Data | Security
-	    if ( isset($_POST['login']) && wp_verify_nonce($_POST['_firebase_login'], 'firebase_login' ) ) {
-	    echo "NONCE Validated!";	    
-	        $this->login_validation(
-		        $_POST['email'],
-		        $_POST['password']	        
-	        );
-	         
-	        // sanitize user form input | Security
-	        global $email, $password;
-	        $email      	=   sanitize_email( $_POST['email'] );
-	        $password   	=   esc_attr( $_POST['password'] );
-	 
-	        // call @function complete_registration to create the user
-	        // only when no WP_error is found | Security		
-			
-			// only log the user in if there are no errors
-			if ( 1 > count( $this->login_errors->get_error_messages() ) ) {
-				echo "string";
-			    	$this->logged_in = true;
-					
-			    	echo '
-				        <script>
-				        	(function( $ ) {
-								"use strict";
-
-								// Get a reference to the database service
-
-								firebase.database().ref("users/" + "'.$user->data->user_login.'").update({
-								    online : true
-								  })
-								.then(function() {
-									  console.log("Successfully Stored Data!");
-									}).catch(function (error){
-										 console.log(error);
-								  });
-				        	})( jQuery );
-				        </script>';
-
-			 wp_redirect(get_site_url() . '/profile/'); exit;
-			}
-	    }
+	    
 	    if ( isset($_POST['logout']) ) {
 	    	wp_logout();
 	    	$this->logged_in = false;
@@ -649,9 +603,9 @@ var_dump(site_url( 'profile/' ));
 			(function ($) {
 				"use strict";
 				// Hide Links
-				$(".signup").hide("fast");
-				$(".login").hide("fast");
-				$('.profile').show("fast").after('<form id="firebaseLogout" action="<?php echo get_site_url().'/login/'; ?>" method="post"><input class="btn btn-danger" id="btnLogout" type="submit" name="logout" value="Logout"/></div></form>');
+				// $(".signup").hide("fast");
+				// $(".login").hide("fast");
+				// $('.profile').show("fast").after('<a href="<?php echo wp_logout_url(); ?>" class="col-2 btn btn-danger" title="logout">Logout</a>');
 				// Incase PHP Function Does Not Work
 				// firebase.database().ref("users/" + "<?php echo $user->data->user_login; ?>").once("value")
 				// .then(function(snapshot) {

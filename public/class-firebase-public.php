@@ -48,10 +48,8 @@ class Firebase_Public {
 	 * @var      string    $reg_errors    The Errors of this plugin.
 	 */
 	private $reg_errors;
-	public $login_errors;
-	private $profile_errors;
-
-	private $logged_in;
+	private $profile_device_errors;
+	private $profile_info_errors;
 
 	/**
 	 * Initialize the class and set its properties.
@@ -87,7 +85,8 @@ class Firebase_Public {
 		 */
 
 		wp_enqueue_style( 'bootstrap4-reboot', 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap-reboot.css', array(), '4.0.0', 'all' );
-		wp_enqueue_style( 'bootstrap4','https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css', array(), '4.0.0', 'all' );		
+		wp_enqueue_style( 'bootstrap4','https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css', array(), '4.0.0', 'all' );
+		wp_enqueue_style( 'open-iconic-bootstrap','https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.1/font/css/open-iconic-bootstrap.min.css', array(), '1.1.1', 'all' );
 		wp_enqueue_style( $this->firebase, plugin_dir_url( __FILE__ ) . 'css/firebase-public.css', array(), $this->version, 'all' );
 
 	}
@@ -317,18 +316,7 @@ class Firebase_Public {
 
 		        add_user_meta( $user, 'address', $address );
 		        add_user_meta( $user, 'city', $city );
-		        add_user_meta( $user, 'zipcode', $zip );
-
-		        $creds = array(
-			        'user_login'    => $email,
-			        'user_password' => $password,
-			        'remember'      => true
-			    );
-		        wp_signon( $creds, false );
-		        wp_set_current_user( $register_user, $username );
-		        wp_set_auth_cookie( $register_user );
-
-		        wp_redirect( site_url('profile/') ); exit;
+		        add_user_meta( $user, 'zipcode', $zip );		        
 
 		    } else{
 		        echo '<div>';
@@ -365,6 +353,8 @@ class Firebase_Public {
 	        
 	        echo '<div class="alert alert-success">Registration complete. Goto <a href="' . get_site_url() . '/login/">login page</a>.</div>
 			';
+
+			wp_redirect( site_url('profile/') ); exit;
 	    }
 	}
 
@@ -478,34 +468,38 @@ class Firebase_Public {
 		</script> -->
 	 		
 		<div class="container">
-	      	<div id="toggle" class="btn-group" role="group" aria-label="Profile Form">
-			  <button id="devices" type="button" class="btn btn-secondary" aria-pressed="true">My Devices</button>
-			  <button id="infos" type="button" class="btn btn-secondary">My Information</button>
-			</div>
-	      <form id="firebaseProfile" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post">
-		<div id="device">
-			
-<?php
+	      	<div class="row justify-content-center pb-3">
+	      		<div id="toggle" class="btn-group" role="group" aria-label="Profile Form">
+				  <button id="devices" type="button" class="btn btn-secondary" aria-pressed="true">My Devices</button>
+				  <button id="infos" type="button" class="btn btn-secondary">My Information</button>
+				</div>
+	      	</div>
 
-	$devices = explode(',', get_user_meta($user->ID, 'deviceID', true));
-	$nicknames = explode(',', get_user_meta($user->ID, 'nickname', true));
-	if (sizeof($devices) > 1) {
+      	<form id="firebaseProfileDevice" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post">
+			<div class="row justify-content-center device">
+		    	<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#deviceModal">Add New Device</button>
+		    </div>
+			<?php
 
-		for ($i=0; $i < sizeof($devices); $i++) {
+				$devices = explode(',', get_user_meta($user->ID, 'deviceID', true));
+				$nicknames = explode(',', get_user_meta($user->ID, 'nickname', true));
+				if (sizeof($devices) > 1) {
 
-?>
+					for ($i=0; $i < sizeof($devices); $i++) {
+
+			?>
 			<div class="row justify-content-center device id-0">
 	          <div class="col-4">
 	            <div class="form-group">
 	              <label for="deviceID-<?php echo $i; ?>">Device ID <?php echo $i; ?><strong>*</strong></label>
-	              <input class="form-control" id="deviceID-<?php echo $i; ?>" type="text" name="deviceID[]" value="<?php echo $devices[$i]; ?>" required disabled>
+	              <input class="form-control deviceID" id="deviceID-<?php echo $i; ?>" type="text" name="deviceID[]" value="<?php echo $devices[$i]; ?>" required disabled>
 	            </div>
 	          </div>
 	          
 	          <div class="col-4">
 	            <div class="form-group">
-	              <label for="nickname-<?php echo $i; ?>">Device Nickname <?php echo $i; ?><strong>*</strong></label>
-	              <input class="form-control" id="nickname-<?php echo $i; ?>" type="text" name="nickname[]" value="<?php echo $nicknames[$i]; ?>" required disabled>
+	              <label for="nickname-<?php echo $i; ?>">Device Nickname <?php echo $i; ?> <a class="editMe float-right" href="#firebaseProfileDevice">&nbsp;<span class="oi oi-pencil"></span></a></label>
+	              <input class="form-control nickname" id="nickname-<?php echo $i; ?>" type="text" name="nickname[]" value="<?php echo $nicknames[$i]; ?>" disabled>
 	            </div>
 	          </div>
 	        </div>
@@ -516,41 +510,102 @@ class Firebase_Public {
 	          <div class="col-4">
 	            <div class="form-group">
 	              <label for="deviceID">Device ID <strong>*</strong></label>
-	              <input class="form-control" id="deviceID" type="text" name="deviceID[]" value="<?php echo get_user_meta($user->ID, 'deviceID', true); ?>" required disabled>
+	              <input class="form-control deviceID" id="deviceID" type="text" name="deviceID[]" value="<?php echo get_user_meta($user->ID, 'deviceID', true); ?>" required disabled>
 	            </div>
 	          </div>
 	          
 	          <div class="col-4">
 	            <div class="form-group">
-	              <label for="nickname">Device Nickname <strong>*</strong></label>
-	              <input class="form-control" id="nickname" type="text" name="nickname[]" value="<?php echo get_user_meta($user->ID, 'nickname', true); ?>" required disabled>
+	              <label for="nickname">Device Nickname <a class="editMe float-right" href="#firebaseProfileDevice">&nbsp;<span class="oi oi-pencil"></span></a></label>
+	              <input class="form-control nickname" id="nickname" type="text" name="nickname[]" value="<?php echo get_user_meta($user->ID, 'nickname', true); ?>" disabled>
 	            </div>
 	          </div>
 	        </div>
 	<?php }	?>
+		<input type="hidden" id="editedDevice" name="editedDevice" value="0">
+	<?php wp_nonce_field( 'firebase_profile_device', '_firebase_profile_device' ); ?>
+    <div class="row justify-content-center device">
+		<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#deviceModal">Add New Device</button>
+    </div>
+    <span>&nbsp;</span>
+	<script>
+		(function($){
+			"use strict";
 
-		    <a href="#firebaseProfile" id="addDevice" class="btn btn-success float-center">Add New Device</a>
+			$('.editMe').click(function (e) {
+				var device = $(this).parent().parent().parent().parent().find('input.deviceID').val();
+				var nickname = $(this).parent().parent().find('input').val();
+				$(this).parent().parent().find('input').removeAttr('disabled');
+				if ($('#saveDevice').val() != 'Save') {
+					$(this).parent().parent().find('input').after('<input id="saveDevice" class="float-right btn btn-success" type="submit" value="Save" name="saveDevice" />');
+				}
+				$('#editedDevice').val(device);
+
+			});
+
+		})(jQuery);
+	</script>
+	</form>
+
+	<!-- New Device Modal -->
+	<div class="modal fade" id="deviceModal" tabindex="-1" role="dialog" aria-labelledby="deviceModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="deviceModalLabel">Add your new device</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="firebaseProfileDevice" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post">
+						
+						<div class="row justify-content-center device id-0">
+							<div class="col-4">
+								<div class="form-group">
+									<label for="deviceID">Device ID <strong>*</strong></label>
+									<input class="form-control deviceID" id="deviceID" type="text" name="deviceID" value="" required>
+								</div>
+							</div>
+							
+							<div class="col-4">
+								<div class="form-group">
+									<label for="nickname">Device Nickname</label>
+									<input class="form-control nickname" id="nickname" type="text" name="nickname" value="">
+								</div>
+							</div>
+						</div>
+						<input type="hidden" name="newDevice" value="1">
+						<?php wp_nonce_field( 'firebase_profile_device', '_firebase_profile_device' ); ?>
+					<div class="modal-footer">
+						<input class="btn btn-success" type="submit" value="Save" name="saveDevice" />
+					</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
 	        
-</div>
-	        <div class="clearfix"></div>
-	        <div id="info">
-	        	<div class="row justify-content-center">           
+
+	<form id="firebaseProfileInfo" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post">
+	        
+	        	<div class="row justify-content-center info">           
 	        	  <div class="col-4">
 	        	    <div class="form-group">
 	        	      <label for="firstname">First Name <strong>*</strong></label>
-	        	      <input class="form-control" id="first_name" type="text" name="first_name" value="<?php echo get_user_meta($user->ID, 'first_name', true); ?>" required disabled>
+	        	      <input class="form-control" id="first_name" type="text" name="first_name" value="<?php echo get_user_meta($user->ID, 'first_name', true); ?>" required>
 	        	    </div>
 	        	  </div>
 	        	
 	        	  <div class="col-4">
 	        	    <div class="form-group">
 	        	      <label for="website">Last Name <strong>*</strong></label>
-	        	      <input class="form-control" id="last_name" type="text" name="last_name" value="<?php echo get_user_meta($user->ID, 'last_name', true); ?>" required disabled>
+	        	      <input class="form-control" id="last_name" type="text" name="last_name" value="<?php echo get_user_meta($user->ID, 'last_name', true); ?>" required>
 	        	    </div>
 	        	  </div>           
 	        	</div>
 	        	
-	        	<div class="row justify-content-center">          
+	        	<div class="row justify-content-center info">          
 	        	  <div class="col-4">
 	        	    <div class="form-group">
 	        	      <label for="username">Username <strong>*</strong></label>
@@ -561,130 +616,70 @@ class Firebase_Public {
 	        	  <div class="col-4">
 	        	    <div class="form-group">
 	        	      <label for="email">Email <strong>*</strong></label>
-	        	      <input class="form-control" id="email" type="text" name="email" value="<?php echo $user->data->user_email; ?>" placeholder="<?php echo $user->data->user_email; ?>" required disabled>
+	        	      <input class="form-control" id="email" type="text" name="email" value="<?php echo $user->data->user_email; ?>" placeholder="<?php echo $user->data->user_email; ?>" required>
 	        	    </div>
 	        	  </div>
 	        	 </div>
 	        	
-	        	 <div class="row justify-content-center password">
-	        	
-	        	  <div class="col-4">
-	        	    <div class="form-group">
-	        	      <label for="password">Password <strong>*</strong></label>
-	        	      <input class="form-control" id="password" type="password" name="password" value="nill" required disabled>
-	        	    </div>
-	        	  </div>
-	        	
-	        	  <div class="col-4">
-	        	    <div class="form-group">
-	        	      <label for="confirmPassword">Confirm Password <strong>*</strong></label>
-	        	      <input class="form-control" id="confirmPassword" type="password" name="confirmPassword" value="nill" required disabled>
-	        	    </div>
-	        	  </div>
-	        	</div>
-	        	
-	        	<div class="row justify-content-center">
+	        	<div class="row justify-content-center info">
 	        	  <div class="col-4">
 	        	    <div class="form-group">
 	        	      <label for="phone">Phone <strong>*</strong></label>
-	        	      <input class="form-control" id="phone" type="text" name="phone" value="<?php echo get_user_meta($user->ID, 'phone', true); ?>" required disabled>
+	        	      <input class="form-control" id="phone" type="text" name="phone" value="<?php echo get_user_meta($user->ID, 'phone', true); ?>" required>
 	        	    </div>
 	        	  </div>
 	        	  
 	        	  <div class="col-4">
 	        	    <div class="form-group">
 	        	      <label for="zip">Zipcode <strong>*</strong></label>
-	        	      <input class="form-control" id="zip" type="text" name="zip" value="<?php echo get_user_meta($user->ID, 'zipcode', true); ?>" required disabled>
+	        	      <input class="form-control" id="zip" type="text" name="zip" value="<?php echo get_user_meta($user->ID, 'zipcode', true); ?>" required>
 	        	    </div>
 	        	  </div>
 	        	</div>
 	        	
-	        	<div class="row justify-content-center">          
+	        	<div class="row justify-content-center info">          
 	        	  
 	        	  <div class="col-4">
 	        	    <div class="form-group">
 	        	      <label for="address">Address <strong>*</strong></label>
-	        	      <input class="form-control" id="address" type="text" name="address" value="<?php echo get_user_meta($user->ID, 'address', true); ?>" required disabled>
+	        	      <input class="form-control" id="address" type="text" name="address" value="<?php echo get_user_meta($user->ID, 'address', true); ?>" required>
 	        	    </div>
 	        	  </div>
 	        	
 	        	  <div class="col-4">
 	        	    <div class="form-group">
 	        	      <label for="city">City <strong>*</strong></label>
-	        	      <input class="form-control" id="city" type="text" name="city" value="<?php echo get_user_meta($user->ID, 'city', true); ?>" required disabled>
+	        	      <input class="form-control" id="city" type="text" name="city" value="<?php echo get_user_meta($user->ID, 'city', true); ?>" required>
 	        	    </div>
 	        	  </div>
 	        	</div>
-	        </div>
+	        
 			<div class="clearfix"></div>
 
-			<?php wp_nonce_field( 'firebase_profile', '_firebase_profile' ); ?>
-	      <div class="row justify-content-center">
-	      	<a id="btnProfile" href="#firebaseProfile" class="btn btn-primary">Update Profile</a>
-	      	<span>&nbsp;</span>
-	        <input class="btn btn-success hidden" id="btnUpdate" type="submit" name="profile" value="Edit Profile"/>
-	        <span>&nbsp;</span>
-	        <a id="btnProfileCancel" href="#firebaseProfile" class="btn btn-danger hidden">Cancel</a>
-	      </div>
-	      <div class="clearfix"></div>
-	      </form>
-	    </div>
+			<?php wp_nonce_field( 'firebase_profile_info', '_firebase_profile_info' ); ?>
+			<div class="row justify-content-center">
+				<input class="btn btn-success" id="btnSaveInfo" type="submit" name="saveInfo" value="Save"/>
+			</div>
+			<div class="clearfix"></div>
+		</form>
+		</div>
 	    <script>
 	    	(function( $ ) {
 				"use strict";
-				var clicked = "<?php echo sizeof($devices) ?>";
 				
-				$('#info').hide('fast');
-				$('#device').show('fast');
+				$('#firebaseProfileDevice').show('fast');
+				$("#firebaseProfileInfo").hide('fast');
 
 				$('#devices').click(function(event) {
-					$('#info').hide('fast');
-					$('#device').show('fast');
+					$('#firebaseProfileDevice').show('fast');
+					$("#firebaseProfileInfo").hide('fast');
 				});
 				$('#infos').click(function(event) {
-					$('#device').hide('fast');
-					$('#info').show('fast');
+					$('#firebaseProfileDevice').hide('fast');
+					$("#firebaseProfileInfo").show('fast');
 				});
 
-				$("#btnUpdate").hide("fast");
-				$("#btnProfileCancel").hide("fast");
-
-				$("#btnProfile").click(function(e){
-					$(this).hide("fast");
-					$("#btnUpdate").show("fast");
-					$("#btnProfileCancel").show("fast");
-					$("#firebaseProfile").each(function(index, el) {
-					
-						$(this).find("input").removeAttr('disabled');
-
-					});
-					$("#username").attr('disabled', 'disabled');
-				});
-
-				$("#btnProfileCancel").click(function(e){
-					$(this).hide("fast");
-					$("#btnUpdate").hide("fast");
-					$("#btnProfile").show("fast");
-					$("#firebaseProfile").each(function(index, el) {
-					
-						$(this).find("input").attr('disabled', 'disabled');
-
-					});
-				});
-
-				$("#addDevice").click(function(event) {
-					$(".device.id-"+clicked).after('<div class="row justify-content-center device id-'+ (clicked+1) +'"><div class="col-4"><div class="form-group"><label for="deviceID">Device ID '+ (clicked+1) +' <strong>*</strong></label><input class="form-control" id="deviceID-'+ (clicked+1) +'" type="text" name="deviceID[]" value="device'+ (clicked+1) +'" required></div></div><div class="col-4"><div class="form-group"><label for="nickname">Device Nickname '+ (clicked+1) +'<strong>*</strong></label><input class="form-control" id="nickname-'+ (clicked+1) +'" type="text" name="nickname[]" value="nickname'+ (clicked+1) +'" required></div></div></div>');
-					$("#btnUpdate").show("fast");
-					$("#btnProfileCancel").show("fast");
-					$("#btnProfile").hide("fast");
-					$("#firebaseProfile").each(function(index, el) {
-					
-						$(this).find("input").removeAttr('disabled');
-
-					});
-					$("#username").attr('disabled', 'disabled');
-					clicked++;
-				});
+				$("#username").attr('disabled', 'disabled');				
 
 			})( jQuery );
 	    </script>
@@ -692,19 +687,125 @@ class Firebase_Public {
 	}
 
 	/**
+	* Validate Profile Device Form
+	*/
+	public function profile_device_validation( $deviceID, $nickname = '', $new = '' )  {
+		
+		global $wpdb;
+		$this->profile_device_errors = new WP_Error();
+		$user = wp_get_current_user();
+
+		if ( empty( $deviceID ) ) {
+		    $this->profile_device_errors->add('field', 'Device ID is missing');
+		}
+		if (!empty($new)) {
+
+			foreach ($deviceID as $value) {
+				# MultiValues Device IDs
+				if ( 2 > strlen( $value ) ) {
+				    $this->profile_device_errors->add( 'deviceID_length', 'Device ID ('.$value.') too short. At least 2 characters is required' );
+				}
+				
+				if ( $wpdb->query( $wpdb->prepare( "SELECT * FROM $wpdb->usermeta WHERE meta_value = %s", '%'.$value.'%' ) ) ) {
+				    $this->profile_device_errors->add( 'deviceid_exist', 'Sorry, this Device ID ('.$value.') already exists!' );
+				}
+			}
+
+		} else {
+
+		    if ( 2 > strlen( $deviceID ) ) {
+			    $this->profile_device_errors->add( 'deviceID_length', 'Device ID ('.$deviceID.') too short. At least 2 characters is required' );
+			}
+			
+			if ( $wpdb->query( $wpdb->prepare( "SELECT * FROM $wpdb->usermeta WHERE meta_value = %s", '%'.$deviceID.'%' ) ) ) {
+			    $this->profile_device_errors->add( 'deviceid_exist', 'Sorry, this Device ID ('.$deviceID.') already exists!' );
+			}
+		}
+
+		if ( is_wp_error( $this->profile_device_errors ) ) {
+ 
+		    foreach ( $this->profile_device_errors->get_error_messages() as $error ) {
+		     
+		        echo '<div>';
+		        echo '<strong>ERROR</strong>:';
+		        echo $error . '<br/>';
+		        echo '</div>';
+		         
+		    }
+		 
+		}
+	}
+
+	/**
+	* Complete User Profile
+	*/
+	public function complete_device_profile($deviceID, $nickname, $new, $pos = '') {
+	
+	    if ( 1 > count( $this->profile_device_errors->get_error_messages() ) ) {
+	    	
+	    	$user = wp_get_current_user();	        
+
+	        if ($new) {
+
+	        	$deviceID  	= get_user_meta($user->ID, 'deviceID', true).','.$deviceID;
+		        $nickname 	= get_user_meta($user->ID, 'nickname', true).','.$nickname;
+	        	
+		        update_user_meta( $user->ID, 'deviceID', $deviceID );
+		        update_user_meta( $user->ID, 'nickname', $nickname );
+
+	        } else {
+		        /**
+		        *	Updating User's Meta Data
+		        */
+
+		        update_user_meta( $user->ID, 'deviceID', $deviceID );
+		        update_user_meta( $user->ID, 'nickname', $nickname );
+	        }
+
+
+	        echo '
+	        <script>
+	        	(function( $ ) {
+					"use strict";
+
+					// Get a reference to the database service
+
+					firebase.database().ref("users/" + "'.$username.'").update({
+					   	deviceID 		: 	"'.$deviceID.'",
+						deviceNickname 	: 	"'.$nickname.'"
+					}).then(function(data) {
+						  console.log("Successfully Updated Data! "+ data);
+						}).catch(function (error){
+							 console.log(error);
+					  });
+	        	})( jQuery );
+	        </script>';
+	        
+	        echo '<div class="alert alert-success">Devices has been updated successfully.</div>
+			<script>
+				(function ($) {
+    				"use strict";
+					$("#firebaseProfileDevice :input").attr("disabled","disabled");
+				})(jQuery);
+			</script>
+			';
+	    }
+	}
+
+	/**
 	* Validate Profile Form
 	*/
-	public function profile_validation( $deviceID, $first_name, $last_name, $nickname, $username, $password, $confirmPassword, $email, $address, $city, $phone, $zip )  {	
+	public function profile_validation( $deviceID, $first_name, $last_name, $nickname, $username, $email, $address, $city, $phone, $zip )  {	
 		
 		global $wpdb;
 		$this->profile_errors = new WP_Error();
 		$user = wp_get_current_user();
 
-		if ( empty( $username ) || empty( $password ) || empty( $confirmPassword ) || empty( $email ) || empty( $first_name ) || empty( $last_name ) || empty( $address ) || empty( $city ) || empty( $phone ) || empty( $zip ) || empty( $deviceID ) ) {
+		if ( empty( $username ) || empty( $email ) || empty( $first_name ) || empty( $last_name ) || empty( $address ) || empty( $city ) || empty( $phone ) || empty( $zip ) || empty( $deviceID ) ) {
 		    $this->profile_errors->add('field', 'Required form field is missing');
 		}
-		if ( 4 > strlen( $username ) ) {
-		    $this->profile_errors->add( 'username_length', 'Username too short. At least 4 characters is required' );
+		if ( !empty( $username ) ) {
+		    $this->profile_errors->add( 'username_added', 'Sorry! You can\'t change the username!');
 		}
 		foreach ($deviceID as $value) {
 			# MultiValues Device IDs
@@ -720,20 +821,6 @@ class Firebase_Public {
 		if ( (get_user_meta($user->ID, 'phone', true) != $phone) && $wpdb->query( $wpdb->prepare( "SELECT * FROM $wpdb->usermeta WHERE meta_value = %s", $phone ) ) ) {
 		    $this->profile_errors->add( 'phone_exist', 'Sorry, this Phone Number already exists!' );
 		}
-		if ( !username_exists( $username ) )
-		    $this->profile_errors->add('user_name', 'Sorry, that username does not exists!');
-
-		if ( ! validate_username( $username ) ) {
-		    $this->profile_errors->add( 'username_invalid', 'Sorry, the username you entered is not valid' );
-		}
-
-		if ( $password != 'nill' && 5 > strlen( $password ) ) {
-	        $this->profile_errors->add( 'password', 'Password length must be greater than 5' );
-	    }
-		
-		if ( $password !== $confirmPassword ) {
-	        $this->profile_errors->add( 'password', 'Password & Confirm Password did not match' );
-	    }
 
 	    if ( !is_email( $email ) ) {
 		    $this->profile_errors->add( 'email_invalid', 'Email is not valid' );
@@ -756,7 +843,7 @@ class Firebase_Public {
 	/**
 	* Complete User Profile
 	*/
-	public function complete_profile($deviceID, $first_name, $last_name, $nickname, $username, $password, $email, $address, $city, $phone, $zip) {
+	public function complete_profile($deviceID, $first_name, $last_name, $nickname, $username, $email, $address, $city, $phone, $zip) {
 	
 	    if ( 1 > count( $this->profile_errors->get_error_messages() ) ) {
 	    	$user = wp_get_current_user();
@@ -764,14 +851,11 @@ class Firebase_Public {
 	        	'ID'		=>	$user->ID,
 	        'user_login'    =>   $username,
 	        'user_email'    =>   $email,
-	        'user_pass'     =>   $password,
 	        'first_name'    =>   $first_name,
 	        'last_name'     =>   $last_name,
 	        'nickname'      =>   $nickname
 	        );
-	        if($password === 'nill') {
-	        	unset($userdata['user_pass']);
-	        }
+
 	        $user = wp_update_user( $userdata );
 
 	        /**
@@ -829,7 +913,33 @@ class Firebase_Public {
 	public function custom_profile_function() {
 		$user = wp_get_current_user();
 	    // Validating Data | Security
-	    if ( isset($_POST['profile'] )  && wp_verify_nonce($_POST['_firebase_profile'], 'firebase_profile' ) ) {	    	
+	    if ( isset($_POST['saveDevice'] )  && wp_verify_nonce($_POST['_firebase_profile_device'], 'firebase_profile_device' ) ) {
+
+	    	$this->profile_device_validation(
+		        $_POST['deviceID'],
+		        $_POST['nickname'],
+	        	$_POST['newDevice']
+	        );
+
+	        // sanitize user form input | Security
+	        global $deviceID, $nickname, $isNew;
+	        $deviceID    	=   sanitize_text_field( (!isset($_POST['newDevice']) ) ? implode(',', $_POST['deviceID']) : $_POST['deviceID'] );
+	        $nickname   	=   sanitize_text_field( (!isset($_POST['newDevice']) ) ? implode(',', $_POST['nickname']) : $_POST['nickname'] );
+	        $isNew			=	(!isset($_POST['newDevice']) ? false : true );
+	 
+	        // call @function complete_registration to create the user
+	        // only when no WP_error is found | Security      
+	        
+	    	$this->complete_device_profile(
+		        $deviceID,
+		        $nickname,
+		        $isNew,
+		        $_POST['editedDevice']
+	        );
+
+	    }
+
+	    if ( isset($_POST['saveInfo'] )  && wp_verify_nonce($_POST['_firebase_profile_info'], 'firebase_profile_info' ) ) {	    	
 
 	        $this->profile_validation(
 		        $_POST['deviceID'],
@@ -837,8 +947,6 @@ class Firebase_Public {
 		        $_POST['last_name'],
 		        $_POST['nickname'],
 		        $_POST['username'],
-		        $_POST['password'],
-				$_POST['confirmPassword'],
 		        $_POST['email'],
 	        	$_POST['address'],
 	        	$_POST['city'],
@@ -847,10 +955,8 @@ class Firebase_Public {
 	        );
 	         
 	        // sanitize user form input | Security
-	        global $deviceID, $first_name, $last_name, $nickname, $username, $password, $confirmPassword, $email, $address, $city, $phone, $zip;
+	        global $deviceID, $first_name, $last_name, $nickname, $username, $email, $address, $city, $phone, $zip;
 	        $username   	=   sanitize_user( $_POST['username'] );
-	        $password   	=   esc_attr( $_POST['password'] );
-			$confirmPassword   	=   esc_attr( $_POST['confirmPassword'] );
 	        $email      	=   sanitize_email( $_POST['email'] );
 	        $deviceID    	=   sanitize_text_field( implode(',', $_POST['deviceID']) );
 	        $first_name 	=   sanitize_text_field( $_POST['first_name'] );
@@ -870,7 +976,6 @@ class Firebase_Public {
 		        $last_name,
 		        $nickname,
 		        $username,
-		        $password,
 		        $email,
 		        $address,
 		        $city,
